@@ -1,9 +1,9 @@
 import { db } from "@/src/db";
 import { users } from "@/src/db/schema";
 import { hashPassword } from "@/src/lib/auth/password";
+import { sendVerificationEmail } from "@/src/lib/mailer";
 import { issueEmailVerificationCode } from "@/src/lib/otp";
 import { registerSchema } from "@/src/lib/validation/auth";
-import { error } from "next/dist/build/output/log";
 import { NextRequest, NextResponse } from "next/server";
 
 const isUniqueViolation = (error: unknown) =>
@@ -57,7 +57,7 @@ export const POST = async (req: NextRequest) => {
         { status: 409 },
       );
     }
-    console.error("Failed to create user", error);
+    console.error("Failed to create user", err);
 
     return NextResponse.json(
       { error: "Something went wrong" },
@@ -67,9 +67,13 @@ export const POST = async (req: NextRequest) => {
 
   try {
     const code = await issueEmailVerificationCode(user.id);
-
     await sendVerificationEmail(user.email, code);
-  } catch (error) {
-    console.error("Failed to send verification email", error);
+  } catch (err) {
+    console.error("Failed to send verification email", err);
   }
+
+  return NextResponse.json(
+    { message: "Registration successful", id: user.id },
+    { status: 201 },
+  );
 };

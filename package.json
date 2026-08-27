@@ -12,7 +12,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
     "@neondatabase/serverless": "^1.1.0",
+    "@tanstack/react-query": "^5.102.6",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
@@ -21,6 +23,7 @@
     "nodemailer": "^9.0.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-hook-form": "^7.86.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
