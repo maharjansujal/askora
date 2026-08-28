@@ -68,8 +68,14 @@ export const RegisterForm = () => {
         {isPending ? "Creating account..." : "Create account"}
       </Button>
 
-      <p style={{ fontSize: 13, textAlign: "center", marginTop: 4 }}>
-        Already have an account? <Link href="/login">Log in</Link>
+      <p className="text-center font-sans text-[13px] text-muted-foreground">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="font-medium text-primary transition-colors hover:text-primary/80"
+        >
+          Log in
+        </Link>
       </p>
     </form>
   );

@@ -1,11 +1,60 @@
 import { LoginForm } from "@/src/features/auth/components/LoginForm";
+import Image from "next/image";
+import Link from "next/link";
+import { FaGithub } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
 export default function LoginPage() {
   return (
-    <main>
-      <h1>Login</h1>
+    <main className="relative flex h-full items-center justify-center bg-background px-4 py-20">
+      <div className="absolute left-0 top-0 sm:left-8 sm:top-8">
+        <Image
+          src="/auth/logo.png"
+          alt="Logo"
+          width={50}
+          height={50}
+          priority
+          className="h-auto w-10 invert dark:invert-0 sm:w-20 md:w-30"
+        />
+      </div>
 
-      <LoginForm />
+      <div className="w-full max-w-[clamp(320px,90vw,420px)]">
+        <div className="mb-8 text-center">
+          <h1 className="font-sans text-3xl font-semibold tracking-tight text-foreground">
+            Welcome back
+          </h1>
+
+          <p className="mt-2 font-sans text-sm text-muted-foreground">
+            Sign in to your account to continue
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            className="flex cursor-pointer h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-background font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <FcGoogle className="size-5" />
+            Continue with Google
+          </button>
+
+          <button
+            type="button"
+            className="flex cursor-pointer h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-background font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <FaGithub className="size-5 text-[#181717] dark:text-white" />
+            Continue with GitHub
+          </button>
+        </div>
+
+        <div className="my-6 flex items-center gap-4">
+          <div className="h-px flex-1 bg-border" />
+          <span className="font-sans text-xs text-muted-foreground">OR</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <LoginForm />
+      </div>
     </main>
   );
 }

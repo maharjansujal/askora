@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/src/components/ui/Button";
-import { LoginInput, useLogin } from "../hooks/useLogin";
 import { Input } from "@/src/components/form/Input";
-import Link from "next/link";
+import { LoginInput, useLogin } from "../hooks/useLogin";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -31,8 +31,15 @@ export const LoginForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {error && <p role="alert">{error.error}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-5">
+      {error && (
+        <p
+          role="alert"
+          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
+        >
+          {error.error}
+        </p>
+      )}
 
       <Input
         id="email"
@@ -60,11 +67,18 @@ export const LoginForm = () => {
         })}
       />
 
-      <Button type="submit" loading={loading}>
+      <Button type="submit" loading={loading} className="w-full">
         Login
       </Button>
-      <p style={{ fontSize: 13, textAlign: "center", marginTop: 4 }}>
-        Don&apos;t have an account? <Link href="/register">Register</Link>
+
+      <p className="text-center font-sans text-[13px] text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="font-medium text-primary transition-colors hover:text-primary/80"
+        >
+          Register
+        </Link>
       </p>
     </form>
   );
