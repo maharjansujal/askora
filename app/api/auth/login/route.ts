@@ -32,6 +32,16 @@ export const POST = async (req: NextRequest) => {
     );
   }
 
+  if (!user.passwordHash) {
+    return NextResponse.json(
+      {
+        error:
+          "This account does not have a password. Please use your OAuth provider to sign in.",
+      },
+      { status: 401 },
+    );
+  }
+
   const validPassword = await verifyPassword(password, user.passwordHash);
   if (!validPassword) {
     return NextResponse.json(

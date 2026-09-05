@@ -54,6 +54,15 @@ export const RegisterForm = () => {
       />
 
       <Input
+        label="Display Name"
+        type="text"
+        placeholder="Your Name"
+        // autoComplete="email"
+        error={errors.displayName?.message}
+        {...registerField("displayName")}
+      />
+
+      <Input
         label="Password"
         type="password"
         placeholder="Enter your password"

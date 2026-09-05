@@ -18,7 +18,7 @@ export const users = pgTable(
     username: text("username").notNull(),
     email: text("email").notNull(),
 
-    passwordHash: text("password_hash").notNull(),
+    passwordHash: text("password_hash"),
 
     displayName: text("display_name"),
     avatarUrl: text("avatar_url"),
@@ -66,5 +66,36 @@ export const users = pgTable(
     index("users_role_idx").on(table.role),
 
     index("users_status_idx").on(table.status),
+  ],
+);
+
+export const oauthAccounts = pgTable(
+  "oauth_accounts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    provider: text("provider").notNull(), // "google" | "github"
+    providerAccountId: text("provider_account_id").notNull(), // the id Google/GitHub gives you
+
+    email: text("email"), // from provider — for display only
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    // composite unique: one account per provider per user
+    uniqueIndex("oauth_accounts_provider_unique").on(
+      table.provider,
+      table.providerAccountId,
+    ),
+
+    index("oauth_accounts_user_idx").on(table.userId),
   ],
 );

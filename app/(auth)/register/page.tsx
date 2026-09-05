@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/Button";
 import { RegisterForm } from "@/src/features/auth/components/RegisterForm";
 import Image from "next/image";
 import { FaGithub } from "react-icons/fa";
@@ -29,21 +30,19 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-3">
-          <button
-            type="button"
-            className="flex cursor-pointer h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-background font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted"
-          >
-            <FcGoogle className="size-5" />
-            Continue with Google
-          </button>
+          <a href="/api/auth/login/google" className="block">
+            <Button variant="outline">
+              <FcGoogle className="size-5" />
+              Continue with Google
+            </Button>
+          </a>
 
-          <button
-            type="button"
-            className="flex cursor-pointer h-11 w-full items-center justify-center gap-3 rounded-md border border-border bg-background font-sans text-sm font-medium text-foreground transition-colors hover:bg-muted"
-          >
-            <FaGithub className="size-5 text-[#181717] dark:text-white" />
-            Continue with GitHub
-          </button>
+          <a href="/api/auth/login/github" className="block">
+            <Button variant="outline">
+              <FaGithub className="size-5" />
+              Continue with GitHub
+            </Button>
+          </a>
         </div>
 
         <div className="my-6 flex items-center gap-4">

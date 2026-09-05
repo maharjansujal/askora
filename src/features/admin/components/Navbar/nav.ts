@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { LogOut, LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Flag,
@@ -14,10 +14,11 @@ import { IconType } from "react-icons";
 
 type NavItem = {
   label: string;
-  href: string;
+  href?: string;
   category: string;
   count?: number;
   icon?: LucideIcon | IconType;
+  isLogout?: boolean;
 };
 
 export const navItems: NavItem[] = [
@@ -68,5 +69,12 @@ export const navItems: NavItem[] = [
     href: "/admin/site-settings",
     category: "Platform",
     icon: Settings,
+  },
+  {
+    label: "Logout",
+    href: "/login",
+    category: "Platform",
+    icon: LogOut,
+    isLogout: true,
   },
 ];
