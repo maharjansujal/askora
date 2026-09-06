@@ -1,7 +1,7 @@
 import { db } from "@/src/db";
 import { oauthAccounts, users } from "@/src/db/schema";
 import { google } from "@/src/lib/auth/oauth";
-import { createSession } from "@/src/lib/auth/session";
+import { createSession, setSessionCookie } from "@/src/lib/auth/session";
 import { generateUsername } from "@/src/lib/auth/username";
 import { decodeIdToken } from "arctic";
 import { and, eq } from "drizzle-orm";
@@ -83,6 +83,9 @@ export const GET = async (req: NextRequest) => {
     // Clean up the OAuth cookies
     cookieStore.delete("google_oauth_state");
     cookieStore.delete("google_code_verifier");
+
+    const { token, expiresAt } = await createSession(userId);
+    await setSessionCookie(token, expiresAt);
 
     return NextResponse.redirect(new URL("/", req.url));
   } catch (err) {
