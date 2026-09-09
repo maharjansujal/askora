@@ -14,5 +14,5 @@ export default async function Home() {
     redirect("/admin/dashboard");
   }
 
-  redirect("/public/dashboard");
+  redirect("/dashboard");
 }

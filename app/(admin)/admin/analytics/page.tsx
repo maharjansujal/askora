@@ -1,5 +1,8 @@
-import { Analytics } from "@/src/features/admin/analytics";
-
 export default function AnalyticsPage() {
-  return <Analytics />;
+  return (
+    <div>
+      <h1>Analytics page</h1>
+      <div>All Questions</div>
+    </div>
+  );
 }

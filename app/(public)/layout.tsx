@@ -1,10 +1,9 @@
-import { Sidebar } from "@/src/features/admin/components/Navbar/Sidebar";
-import React from "react";
+import { Sidebar } from "@/src/features/public/components/Navbar/Sidebar";
 
 const Layout = ({ children }: { children: React.ReactNode }) => (
   <main className="flex h-full bg-background">
     <Sidebar />
-    <div className="w-full max-w-360 p-20">{children}</div>
+    <div className="w-full max-w-360 p-10">{children}</div>
   </main>
 );
 

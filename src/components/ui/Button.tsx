@@ -1,4 +1,11 @@
-import { ButtonHTMLAttributes } from "react";
+import { LucideProps } from "lucide-react";
+import {
+  ButtonHTMLAttributes,
+  cloneElement,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+} from "react";
 
 type ButtonVariant =
   | "default"
@@ -7,13 +14,19 @@ type ButtonVariant =
   | "ghost"
   | "destructive";
 
+type ButtonSize = "sm" | "md" | "lg" | "xl";
+type ButtonIcon = React.ReactElement<LucideProps>;
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
   variant?: ButtonVariant;
+  size?: ButtonSize;
+  icon?: ButtonIcon;
+  iconPosition?: "left" | "right";
 };
 
 const variants: Record<ButtonVariant, string> = {
-  default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+  default: "bg-primary text-foreground shadow-sm hover:bg-primary/90",
 
   outline:
     "border border-border bg-background text-foreground shadow-sm hover:bg-muted",
@@ -27,29 +40,102 @@ const variants: Record<ButtonVariant, string> = {
     "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
 };
 
+const sizes: Record<
+  ButtonSize,
+  {
+    className: string;
+    iconSize: number;
+  }
+> = {
+  sm: {
+    className: "h-9 px-3 text-xs gap-1.5 rounded-md",
+    iconSize: 14,
+  },
+
+  md: {
+    className: "h-10 px-4 text-sm gap-2 rounded-lg",
+    iconSize: 16,
+  },
+
+  lg: {
+    className: "h-11 px-5 text-base gap-2.5 rounded-lg",
+    iconSize: 18,
+  },
+
+  xl: {
+    className: "h-12 px-6 text-base gap-3 rounded-xl",
+    iconSize: 20,
+  },
+};
+
+const renderIcon = (icon: ButtonIcon | undefined, size: number) => {
+  if (!icon) return null;
+
+  return cloneElement(icon, {
+    size,
+    width: size,
+    height: size,
+    className: `shrink-0 ${icon.props.className ?? ""}`,
+  });
+};
+
 export const Button = ({
   children,
   loading = false,
   disabled,
   className = "",
   variant = "default",
+  size = "md",
+  icon,
+  iconPosition = "left",
   type = "button",
   ...props
 }: ButtonProps) => {
+  const sizeConfig = sizes[size];
+
+  const renderedIcon = loading ? (
+    <span
+      className="shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+      style={{
+        width: sizeConfig.iconSize,
+        height: sizeConfig.iconSize,
+      }}
+    />
+  ) : (
+    renderIcon(icon, sizeConfig.iconSize)
+  );
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex w-full gap-2 cursor-pointer items-center justify-center rounded-lg px-4 py-2.5 font-sans text-sm font-medium outline-none transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={[
+        "inline-flex cursor-pointer items-center justify-center font-semibold",
+        "font-sans font-medium outline-none",
+        "transition-all duration-150",
+        "focus-visible:ring-2 focus-visible:ring-ring",
+        "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "active:scale-[0.99]",
+        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        variants[variant],
+        sizeConfig.className,
+        className,
+      ].join(" ")}
       {...props}
     >
       {loading ? (
         <>
-          <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          {renderedIcon}
           Loading...
         </>
       ) : (
-        children
+        <>
+          {iconPosition === "left" && renderedIcon}
+
+          <span>{children}</span>
+
+          {iconPosition === "right" && renderedIcon}
+        </>
       )}
     </button>
   );

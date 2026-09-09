@@ -1,5 +1,8 @@
-import { SiteAndSettings } from "@/src/features/admin/site-settings";
-
 export default function SiteSettingsPage() {
-  return <SiteAndSettings />;
+  return (
+    <div>
+      <h1>Site and Settings</h1>
+      <div>All Questions</div>
+    </div>
+  );
 }

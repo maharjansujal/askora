@@ -1,5 +1,8 @@
-import { AllQuestions } from "@/src/features/admin/all-questions";
-
 export default function AllQuestionsPage() {
-  return <AllQuestions />;
+  return (
+    <div>
+      <h1>All Questions</h1>
+      <div>All Questions</div>
+    </div>
+  );
 }
