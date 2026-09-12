@@ -4,7 +4,7 @@ import { google } from "@/src/lib/auth/oauth";
 import { createSession, setSessionCookie } from "@/src/lib/auth/session";
 import { generateUsername } from "@/src/lib/auth/username";
 import { decodeIdToken } from "arctic";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,75 +17,145 @@ export const GET = async (req: NextRequest) => {
   const storedState = cookieStore.get("google_oauth_state")?.value;
   const codeVerifier = cookieStore.get("google_code_verifier")?.value;
 
-  //   Always redirect to login on any validation failure
   const failRedirect = NextResponse.redirect(
     new URL("/login?error=oauth_failed", req.url),
   );
 
-  if (!code || !state || !storedState || !codeVerifier) return failRedirect;
-  if (state !== storedState) return failRedirect;
+  if (!code || !state || !storedState || !codeVerifier) {
+    return failRedirect;
+  }
+
+  if (state !== storedState) {
+    return failRedirect;
+  }
 
   try {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier);
 
-    // Google puts the profile inside a signed JWT called the id_token
     const idToken = tokens.idToken();
+
     const claims = decodeIdToken(idToken) as {
-      sub: string; // Google's unique user ID
+      sub: string;
       email: string;
-      name: string;
-      picture: string;
+      name?: string;
+      picture?: string;
       email_verified: boolean;
     };
 
-    const { sub: providerAccountId, email, name } = claims;
-    // Look up existing OAuth link
+    const {
+      sub: providerAccountId,
+      email,
+      name,
+      picture,
+      email_verified,
+    } = claims;
+
+    if (!email || !email_verified) {
+      return NextResponse.redirect(
+        new URL("/login?error=email_not_verified", req.url),
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
     const [existingOAuth] = await db
-      .select({ userId: oauthAccounts.userId })
+      .select({
+        userId: oauthAccounts.userId,
+      })
       .from(oauthAccounts)
       .where(
         and(
           eq(oauthAccounts.provider, "google"),
           eq(oauthAccounts.providerAccountId, providerAccountId),
         ),
-      );
+      )
+      .limit(1);
+
     let userId: string;
 
     if (existingOAuth) {
       userId = existingOAuth.userId;
-    } else {
-      // New user — create both rows atomically
-      const result = await db.transaction(async (tx) => {
-        const [user] = await tx
-          .insert(users)
-          .values({
-            username: await generateUsername(name, email),
-            email: email.toLowerCase(),
-            passwordHash: null,
-            emailVerifiedAt: new Date(), // Google already verified it
-          })
-          .returning({ id: users.id });
 
-        await tx.insert(oauthAccounts).values({
-          userId: user.id,
-          provider: "google",
-          providerAccountId,
-          email,
+      await db
+        .update(oauthAccounts)
+        .set({
+          email: normalizedEmail,
           accessToken: tokens.accessToken(),
+        })
+        .where(
+          and(
+            eq(oauthAccounts.provider, "google"),
+            eq(oauthAccounts.providerAccountId, providerAccountId),
+          ),
+        );
+    } else {
+      const [existingUser] = await db
+        .select({
+          id: users.id,
+        })
+        .from(users)
+        .where(sql`lower(${users.email}) = ${normalizedEmail}`)
+        .limit(1);
+
+      if (existingUser) {
+        userId = existingUser.id;
+
+        await db.transaction(async (tx) => {
+          await tx
+            .update(users)
+            .set({
+              avatarUrl: picture ?? undefined,
+              displayName: name ?? undefined,
+              emailVerifiedAt: sql`coalesce(${users.emailVerifiedAt}, now())`,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, userId));
+
+          await tx.insert(oauthAccounts).values({
+            userId,
+            provider: "google",
+            providerAccountId,
+            email: normalizedEmail,
+            accessToken: tokens.accessToken(),
+          });
+        });
+      } else {
+        const result = await db.transaction(async (tx) => {
+          const [user] = await tx
+            .insert(users)
+            .values({
+              username: await generateUsername(name ?? "user", normalizedEmail),
+              email: normalizedEmail,
+              passwordHash: null,
+              displayName: name ?? null,
+              avatarUrl: picture ?? null,
+              emailVerifiedAt: new Date(),
+            })
+            .returning({
+              id: users.id,
+            });
+
+          await tx.insert(oauthAccounts).values({
+            userId: user.id,
+            provider: "google",
+            providerAccountId,
+            email: normalizedEmail,
+            accessToken: tokens.accessToken(),
+          });
+
+          return user;
         });
 
-        return user;
-      });
-      userId = result.id;
+        userId = result.id;
+      }
     }
-    // Issue session using existing session logic
-    await createSession(userId);
-    // Clean up the OAuth cookies
-    cookieStore.delete("google_oauth_state");
-    cookieStore.delete("google_code_verifier");
 
     const { token, expiresAt } = await createSession(userId);
+
     await setSessionCookie(token, expiresAt);
+
+    cookieStore.delete("google_oauth_state");
+    cookieStore.delete("google_code_verifier");
 
     return NextResponse.redirect(new URL("/", req.url));
   } catch (err) {
