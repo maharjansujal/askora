@@ -1,10 +1,9 @@
-import { LucideProps } from "lucide-react";
 import {
   ButtonHTMLAttributes,
   cloneElement,
+  ComponentType,
   isValidElement,
   ReactElement,
-  ReactNode,
 } from "react";
 
 type ButtonVariant =
@@ -15,7 +14,17 @@ type ButtonVariant =
   | "destructive";
 
 type ButtonSize = "sm" | "md" | "lg" | "xl";
-type ButtonIcon = React.ReactElement<LucideProps>;
+
+type IconProps = {
+  size?: number | string;
+  width?: number | string;
+  height?: number | string;
+  className?: string;
+};
+
+type IconComponent = ComponentType<IconProps>;
+
+type ButtonIcon = IconComponent | ReactElement<IconProps>;
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
@@ -27,15 +36,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variants: Record<ButtonVariant, string> = {
   default: "bg-primary text-foreground shadow-sm hover:bg-primary/90",
-
   outline:
     "border border-border bg-background text-foreground shadow-sm hover:bg-muted",
-
   secondary:
     "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-
   ghost: "bg-transparent text-foreground hover:bg-muted",
-
   destructive:
     "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
 };
@@ -51,17 +56,14 @@ const sizes: Record<
     className: "h-9 px-3 text-xs gap-1.5 rounded-md",
     iconSize: 14,
   },
-
   md: {
     className: "h-10 px-4 text-sm gap-2 rounded-lg",
     iconSize: 16,
   },
-
   lg: {
     className: "h-11 px-5 text-base gap-2.5 rounded-lg",
     iconSize: 18,
   },
-
   xl: {
     className: "h-12 px-6 text-base gap-3 rounded-xl",
     iconSize: 20,
@@ -71,12 +73,18 @@ const sizes: Record<
 const renderIcon = (icon: ButtonIcon | undefined, size: number) => {
   if (!icon) return null;
 
-  return cloneElement(icon, {
-    size,
-    width: size,
-    height: size,
-    className: `shrink-0 ${icon.props.className ?? ""}`,
-  });
+  if (isValidElement<IconProps>(icon)) {
+    return cloneElement(icon, {
+      size,
+      width: size,
+      height: size,
+      className: `shrink-0 ${icon.props.className ?? ""}`,
+    });
+  }
+
+  const Icon = icon;
+
+  return <Icon size={size} width={size} height={size} className="shrink-0" />;
 };
 
 export const Button = ({
@@ -110,9 +118,8 @@ export const Button = ({
       type={type}
       disabled={disabled || loading}
       className={[
-        "inline-flex cursor-pointer items-center justify-center font-semibold",
-        "font-sans font-medium outline-none",
-        "transition-all duration-150",
+        "inline-flex cursor-pointer items-center justify-center font-sans font-medium",
+        "outline-none transition-all duration-150",
         "focus-visible:ring-2 focus-visible:ring-ring",
         "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "active:scale-[0.99]",
@@ -126,7 +133,7 @@ export const Button = ({
       {loading ? (
         <>
           {renderedIcon}
-          Loading...
+          <span>Loading...</span>
         </>
       ) : (
         <>

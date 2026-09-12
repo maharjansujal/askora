@@ -9,7 +9,7 @@ export default function LoginPage() {
     <main className="relative flex h-full items-center justify-center bg-background px-4 py-20">
       <div className="absolute left-0 top-0 sm:left-8 sm:top-8">
         <Image
-          src="/auth/logo.png"
+          src="/logo.png"
           alt="Logo"
           width={50}
           height={50}
@@ -31,15 +31,23 @@ export default function LoginPage() {
 
         <div className="space-y-3">
           <a href="/api/auth/login/google" className="block">
-            <Button variant="outline">
-              <FcGoogle className="size-5" />
+            <Button
+              variant="outline"
+              icon={FcGoogle}
+              className="w-full"
+              size="md"
+            >
               Continue with Google
             </Button>
           </a>
 
           <a href="/api/auth/login/github" className="block">
-            <Button variant="outline">
-              <FaGithub className="size-5" />
+            <Button
+              variant="outline"
+              icon={FaGithub}
+              className="w-full"
+              size="md"
+            >
               Continue with GitHub
             </Button>
           </a>

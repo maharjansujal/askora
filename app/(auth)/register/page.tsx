@@ -31,15 +31,23 @@ export default function RegisterPage() {
 
         <div className="space-y-3">
           <a href="/api/auth/login/google" className="block">
-            <Button variant="outline">
-              <FcGoogle className="size-5" />
+            <Button
+              variant="outline"
+              icon={FcGoogle}
+              className="w-full"
+              size="md"
+            >
               Continue with Google
             </Button>
           </a>
 
           <a href="/api/auth/login/github" className="block">
-            <Button variant="outline">
-              <FaGithub className="size-5" />
+            <Button
+              variant="outline"
+              icon={FaGithub}
+              className="w-full"
+              size="md"
+            >
               Continue with GitHub
             </Button>
           </a>
