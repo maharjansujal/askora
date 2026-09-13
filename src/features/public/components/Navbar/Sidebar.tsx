@@ -60,7 +60,7 @@ export function Sidebar() {
                   // ── Logout button ──
                   if (item.isLogout) {
                     return (
-                      <form action={logoutAction}>
+                      <form action={logoutAction} key={item.href}>
                         <button
                           type="submit"
                           disabled={isPending}
