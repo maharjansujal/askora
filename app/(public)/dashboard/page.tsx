@@ -12,7 +12,7 @@ export default function PublicDashboardPage() {
             points by contributing reviewed solutions
           </span>
         </div>
-        <Button icon={<Plus size={24} />}>Ask a question</Button>
+        <Button icon={Plus}>Ask a question</Button>
       </div>
     </>
   );

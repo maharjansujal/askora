@@ -17,26 +17,38 @@ export async function login(
   _prevState: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "");
+  const identifier = String(formData.get("identifier") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!email || !password) {
+  if (!identifier) {
     return {
-      error: "Email and password are required.",
+      error: "Email or username is required.",
     };
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
+  if (!password) {
+    return {
+      error: "Password is required.",
+    };
+  }
+
+  // If it looks like an email, normalize it.
+  // Otherwise treat it as a username.
+  const isEmail = identifier.includes("@");
 
   const [user] = await db
     .select()
     .from(users)
-    .where(sql`lower(${users.email}) = ${normalizedEmail}`)
+    .where(
+      isEmail
+        ? sql`lower(${users.email}) = ${identifier.toLowerCase()}`
+        : sql`lower(${users.username}) = ${identifier.toLowerCase()}`,
+    )
     .limit(1);
 
   if (!user) {
     return {
-      error: "Invalid email or password.",
+      error: "Invalid email/username or password.",
     };
   }
 
@@ -51,7 +63,7 @@ export async function login(
 
   if (!validPassword) {
     return {
-      error: "Invalid email or password.",
+      error: "Invalid email/username or password.",
     };
   }
 

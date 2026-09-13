@@ -15,12 +15,12 @@ export const LoginForm = () => {
   return (
     <form action={formAction} className="w-full space-y-5">
       <Input
-        id="email"
-        name="email"
-        type="email"
-        label="Email"
-        placeholder="you@example.com"
-        autoComplete="email"
+        id="identifier"
+        name="identifier"
+        type="text"
+        label="Email or username"
+        placeholder="you@example.com or username"
+        autoComplete="username"
         disabled={loading}
       />
 

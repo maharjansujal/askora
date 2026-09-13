@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { navItems } from "./nav";
-import { useLogout } from "@/src/features/auth/hooks/useLogout";
 import { logout } from "@/src/features/auth/actions/logout";
 import { useActionState } from "react";
 
