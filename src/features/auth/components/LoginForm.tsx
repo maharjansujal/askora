@@ -1,71 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useActionState } from "react";
 
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/form/Input";
-import { LoginInput, useLogin } from "../hooks/useLogin";
+import { login, type LoginState } from "../actions/login";
+
+const initialState: LoginState = {};
 
 export const LoginForm = () => {
-  const router = useRouter();
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<LoginInput>();
-
-  const { mutate: login, isPending: loading, error } = useLogin();
-
-  const onSubmit = (data: LoginInput) => {
-    login(data, {
-      onSuccess: () => {
-        reset();
-        router.push("/");
-        router.refresh();
-      },
-    });
-  };
+  const [state, formAction, loading] = useActionState(login, initialState);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-5">
-      {error && (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400"
-        >
-          {error.error}
-        </p>
-      )}
-
+    <form action={formAction} className="w-full space-y-5">
       <Input
         id="email"
+        name="email"
         type="email"
         label="Email"
         placeholder="you@example.com"
         autoComplete="email"
         disabled={loading}
-        error={errors.email?.message}
-        {...register("email", {
-          required: "Email is required",
-        })}
       />
 
       <Input
         id="password"
+        name="password"
         type="password"
         label="Password"
         placeholder="••••••••"
         autoComplete="current-password"
         disabled={loading}
-        error={errors.password?.message}
-        {...register("password", {
-          required: "Password is required",
-        })}
       />
+
+      {state.error && <p className="text-sm text-red-500">{state.error}</p>}
 
       <Button type="submit" loading={loading} className="w-full">
         Login

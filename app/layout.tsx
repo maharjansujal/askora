@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My App",
-  description: "My application",
+  title: "Askora",
+  description: "Q&A app",
 };
 
 export default function RootLayout({

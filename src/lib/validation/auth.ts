@@ -24,3 +24,5 @@ export const verifyEmailSchema = z.object({
 export const resendCodeSchema = z.object({
   userId: z.uuid(),
 });
+
+export type RegisterFormValues = z.infer<typeof registerSchema>;

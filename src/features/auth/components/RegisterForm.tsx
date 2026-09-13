@@ -1,80 +1,70 @@
 "use client";
 
+import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "@/src/lib/validation/auth";
-import { useRegister } from "../hooks/useRegister";
-import { Input } from "@/src/components/form/Input";
-import { Button } from "@/src/components/ui/Button";
 import Link from "next/link";
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/form/Input";
+import { register, type RegisterState } from "../actions/register";
+
+const initialState: RegisterState = {};
 
 export const RegisterForm = () => {
   const router = useRouter();
 
-  const { mutate: register, isPending, error } = useRegister();
+  const [state, formAction, isPending] = useActionState(register, initialState);
 
-  const {
-    register: registerField,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  const onSubmit = (data: RegisterFormValues) => {
-    register(data, {
-      onSuccess: (result) => {
-        console.log(result);
-        router.push(`/verify-email?userId=${result.id}`);
-      },
-    });
-  };
+  useEffect(() => {
+    if (state.id) {
+      router.push(`/verify-email?userId=${state.id}`);
+    }
+  }, [state.id, router]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form action={formAction} className="space-y-5">
       <Input
+        id="username"
+        name="username"
         label="Username"
         placeholder="Enter your username"
         autoComplete="username"
-        error={errors.username?.message}
-        {...registerField("username")}
+        disabled={isPending}
       />
 
       <Input
-        label="Email"
+        id="email"
+        name="email"
         type="email"
+        label="Email"
         placeholder="you@example.com"
         autoComplete="email"
-        error={errors.email?.message}
-        {...registerField("email")}
+        disabled={isPending}
       />
 
       <Input
-        label="Display Name"
+        id="displayName"
+        name="displayName"
         type="text"
+        label="Display Name"
         placeholder="Your Name"
-        // autoComplete="email"
-        error={errors.displayName?.message}
-        {...registerField("displayName")}
+        disabled={isPending}
       />
 
       <Input
-        label="Password"
+        id="password"
+        name="password"
         type="password"
+        label="Password"
         placeholder="Enter your password"
         autoComplete="new-password"
-        error={errors.password?.message}
-        {...registerField("password")}
+        disabled={isPending}
       />
 
-      {error && <p className="text-sm text-destructive">{error.message}</p>}
+      {state.error && <p className="text-sm text-destructive">{state.error}</p>}
 
-      <Button type="submit" disabled={isPending} className="w-full">
-        {isPending ? "Creating account..." : "Create account"}
+      <Button type="submit" loading={isPending} className="w-full">
+        Create account
       </Button>
 
       <p className="text-center font-sans text-[13px] text-muted-foreground">

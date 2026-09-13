@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { navItems } from "./nav";
 import { useLogout } from "@/src/features/auth/hooks/useLogout";
+import { logout } from "@/src/features/auth/actions/logout";
+import { useActionState } from "react";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { mutate: logout, isPending } = useLogout();
-
+  const [_, logoutAction, isPending] = useActionState(logout, undefined);
   const categories = [...new Set(navItems.map((item) => item.category))];
 
   // Shared classes extracted to avoid repetition
@@ -60,27 +61,29 @@ export function Sidebar() {
                   // ── Logout button ──
                   if (item.isLogout) {
                     return (
-                      <button
-                        key="logout"
-                        onClick={() => logout()}
-                        disabled={isPending}
-                        className={[
-                          itemBase,
-                          "w-full text-left cursor-pointer",
-                          "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
-                          isPending && "pointer-events-none opacity-50",
-                        ].join(" ")}
-                      >
-                        {Icon && (
-                          <Icon
-                            className="size-4.5 shrink-0 text-muted-foreground group-hover:text-destructive transition-colors"
-                            strokeWidth={1.8}
-                          />
-                        )}
-                        <span className="truncate">
-                          {isPending ? "Signing out…" : item.label}
-                        </span>
-                      </button>
+                      <form action={logoutAction}>
+                        <button
+                          type="submit"
+                          disabled={isPending}
+                          className={[
+                            itemBase,
+                            "w-full text-left cursor-pointer",
+                            "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                            isPending && "pointer-events-none opacity-50",
+                          ].join(" ")}
+                        >
+                          {Icon && (
+                            <Icon
+                              className="size-4.5 shrink-0 text-muted-foreground transition-colors group-hover:text-destructive"
+                              strokeWidth={1.8}
+                            />
+                          )}
+
+                          <span className="truncate">
+                            {isPending ? "Signing out…" : "Logout"}
+                          </span>
+                        </button>
+                      </form>
                     );
                   }
 
