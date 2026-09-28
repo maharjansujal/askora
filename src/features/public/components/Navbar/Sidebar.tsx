@@ -26,7 +26,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-68 shrink-0 flex-col border-r border-border bg-card">
       {/* Header */}
-      <div className="flex h-18 items-center border-b border-border px-5">
+      {/* <div className="flex h-18 items-center border-b border-border px-5">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ShieldCheck className="size-5" strokeWidth={2.2} />
@@ -35,12 +35,9 @@ export function Sidebar() {
             <span className="text-[18px] font-semibold tracking-tight text-foreground">
               Askora
             </span>
-            <span className="rounded-md bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent-foreground">
-              Admin
-            </span>
           </div>
         </Link>
-      </div>
+      </div> */}
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-5">

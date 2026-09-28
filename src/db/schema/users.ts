@@ -8,7 +8,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { roleEnum, userStatusEnum } from "./enums";
-import { sql } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
 
 export const users = pgTable(
   "users",
@@ -20,7 +20,7 @@ export const users = pgTable(
 
     passwordHash: text("password_hash"),
 
-    displayName: text("display_name"),
+    displayName: text("display_name").notNull(),
     avatarUrl: text("avatar_url"),
     bio: text("bio"),
 
@@ -99,3 +99,5 @@ export const oauthAccounts = pgTable(
     index("oauth_accounts_user_idx").on(table.userId),
   ],
 );
+
+export type User = InferSelectModel<typeof users>;

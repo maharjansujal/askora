@@ -1,6 +1,5 @@
 import { google } from "@/src/lib/auth/oauth";
 import { generateCodeVerifier, generateState } from "arctic";
-import { googleFontsMetadata } from "next/dist/compiled/@next/font/dist/google/google-fonts-metadata";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 

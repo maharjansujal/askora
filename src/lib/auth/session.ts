@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import { sha256 } from "./password";
 import { db } from "@/src/db";
-import { sessions, users } from "@/src/db/schema";
+import { sessions, User, users } from "@/src/db/schema";
 import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 
