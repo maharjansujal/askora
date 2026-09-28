@@ -23,7 +23,7 @@ const isProtectedRoute = (pathname: string) =>
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Ignore Next.js internals and static files.

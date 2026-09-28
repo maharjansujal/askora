@@ -10,7 +10,7 @@ export const Navbar = async () => {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <div className="mx-auto flex max-w-400 items-center gap-5 px-5 py-3">
+      <div className="mx-auto flex max-w-360 items-center gap-5 px-5 py-3">
         {/* Logo */}
         <a
           href="/"

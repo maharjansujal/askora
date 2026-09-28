@@ -1,92 +1,70 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useActionState } from "react";
 import { navItems } from "./nav";
 import { logout } from "@/src/features/auth/actions/logout";
-import { useActionState } from "react";
+
+const logoutItem = navItems.find((item) => item.isLogout);
+const linkItems = navItems.filter((item) => !item.isLogout);
+const categories = [...new Set(linkItems.map((item) => item.category))];
+
+// Every query-param key used by a nav href (e.g. "subject"). Used so that
+// "Home" isn't highlighted while a subject filter is active.
+const queryKeys = new Set(
+  linkItems.flatMap((item) => [
+    ...new URLSearchParams(item.href?.split("?")[1] ?? "").keys(),
+  ]),
+);
+
+const itemBase = [
+  "group flex h-9 items-center gap-2.5 rounded-lg px-2.5",
+  "text-[13.5px] font-medium transition-colors",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+].join(" ");
+
+const activeClass = "bg-secondary text-secondary-foreground";
+const inactiveClass =
+  "text-muted-foreground hover:bg-muted hover:text-foreground";
+
+function formatCount(n: number) {
+  return n >= 1000
+    ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`
+    : String(n);
+}
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [_, logoutAction, isPending] = useActionState(logout, undefined);
-  const categories = [...new Set(navItems.map((item) => item.category))];
+  const searchParams = useSearchParams();
+  const [, logoutAction, isPending] = useActionState(logout, undefined);
 
-  // Shared classes extracted to avoid repetition
-  const itemBase = [
-    "group flex h-10 items-center gap-3 rounded-lg px-2.5",
-    "text-sm font-medium transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-  ].join(" ");
+  const isActive = (href: string) => {
+    const [path, query] = href.split("?");
+    if (pathname !== path) return false;
 
-  const activeClass = "bg-primary/10 text-primary";
-  const inactiveClass =
-    "text-muted-foreground hover:bg-muted hover:text-foreground";
+    if (query) {
+      const wanted = new URLSearchParams(query);
+      return [...wanted].every(([k, v]) => searchParams.get(k) === v);
+    }
+    return ![...queryKeys].some((k) => searchParams.has(k));
+  };
 
   return (
-    <aside className="flex h-screen w-68 shrink-0 flex-col border-r border-border bg-card">
-      {/* Header */}
-      {/* <div className="flex h-18 items-center border-b border-border px-5">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <ShieldCheck className="size-5" strokeWidth={2.2} />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[18px] font-semibold tracking-tight text-foreground">
-              Askora
-            </span>
-          </div>
-        </Link>
-      </div> */}
-
-      {/* Navigation */}
+    <aside className="hidden h-full w-60 shrink-0 flex-col border-r border-border bg-background lg:flex">
       <nav className="flex-1 overflow-y-auto px-3 py-5">
-        {categories.map((category) => {
-          const items = navItems.filter((item) => item.category === category);
+        {categories.map((category) => (
+          <div key={category} className="mb-5 last:mb-0">
+            <div className="mb-1.5 px-2.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+              {category}
+            </div>
 
-          return (
-            <div key={category} className="mb-6 last:mb-0">
-              <div className="mb-2 px-2.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
-                {category}
-              </div>
-
-              <div className="space-y-1">
-                {items.map((item) => {
+            <div className="space-y-0.5">
+              {linkItems
+                .filter((item) => item.category === category)
+                .map((item) => {
                   const Icon = item.icon;
-
-                  // ── Logout button ──
-                  if (item.isLogout) {
-                    return (
-                      <form action={logoutAction} key={item.href}>
-                        <button
-                          type="submit"
-                          disabled={isPending}
-                          className={[
-                            itemBase,
-                            "w-full text-left cursor-pointer",
-                            "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
-                            isPending && "pointer-events-none opacity-50",
-                          ].join(" ")}
-                        >
-                          {Icon && (
-                            <Icon
-                              className="size-4.5 shrink-0 text-muted-foreground transition-colors group-hover:text-destructive"
-                              strokeWidth={1.8}
-                            />
-                          )}
-
-                          <span className="truncate">
-                            {isPending ? "Signing out…" : "Logout"}
-                          </span>
-                        </button>
-                      </form>
-                    );
-                  }
-
-                  // ── Regular nav link ──
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== "/" && pathname.startsWith(item.href!));
+                  const active = isActive(item.href!);
 
                   return (
                     <Link
@@ -94,15 +72,15 @@ export function Sidebar() {
                       href={item.href!}
                       className={[
                         itemBase,
-                        isActive ? activeClass : inactiveClass,
+                        active ? activeClass : inactiveClass,
                       ].join(" ")}
                     >
                       {Icon && (
                         <Icon
                           className={[
-                            "size-4.5 shrink-0 transition-colors",
-                            isActive
-                              ? "text-primary"
+                            "size-4 shrink-0 transition-colors",
+                            active
+                              ? "text-secondary-foreground"
                               : "text-muted-foreground group-hover:text-foreground",
                           ].join(" ")}
                           strokeWidth={1.8}
@@ -110,26 +88,45 @@ export function Sidebar() {
                       )}
                       <span className="truncate">{item.label}</span>
                       {item.count !== undefined && (
-                        <span
-                          className={[
-                            "ml-auto flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5",
-                            "text-[11px] font-semibold leading-none",
-                            item.label === "Flagged Content"
-                              ? "bg-destructive text-destructive-foreground"
-                              : "bg-accent text-accent-foreground",
-                          ].join(" ")}
-                        >
-                          {item.count}
+                        <span className="ml-auto text-[11px] font-medium text-muted-foreground">
+                          {formatCount(item.count)}
                         </span>
                       )}
                     </Link>
                   );
                 })}
-              </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </nav>
+
+      {/* Footer: logout */}
+      {logoutItem && (
+        <div className="border-t border-border px-3 py-3">
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              disabled={isPending}
+              className={[
+                itemBase,
+                "w-full cursor-pointer text-left",
+                "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                isPending && "pointer-events-none opacity-50",
+              ].join(" ")}
+            >
+              {logoutItem.icon && (
+                <logoutItem.icon
+                  className="size-4 shrink-0"
+                  strokeWidth={1.8}
+                />
+              )}
+              <span className="truncate">
+                {isPending ? "Signing out…" : "Logout"}
+              </span>
+            </button>
+          </form>
+        </div>
+      )}
     </aside>
   );
 }

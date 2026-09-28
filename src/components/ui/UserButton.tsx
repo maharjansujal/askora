@@ -2,38 +2,59 @@
 
 import { User } from "@/src/db/schema";
 import {
-  ChevronDown,
   LogOut,
   LucideIcon,
   Settings,
   Trophy,
   User as UserIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const UserButton = ({ user }: { user: User }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const userButtonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userButtonRef.current &&
+        !userButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="relative inline-block">
+    <div ref={userButtonRef} className="relative inline-block">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 rounded-lg border border-border bg-transparent px-2 py-1.5 hover:bg-muted transition-colors"
+        className="flex items-center cursor-pointer"
       >
-        <div className="h-8 w-8 rounded-full bg-linear-to-br from-primary to-purple-300 flex items-center justify-center text-xs font-bold text-primary-foreground shrink-0">
+        <div
+          className={`h-8 w-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-primary-foreground transition-all duration-150 ${
+            isOpen
+              ? "ring-2 ring-border ring-offset-2 ring-offset-background"
+              : "ring-1 ring-border"
+          }`}
+        >
           {user.avatarUrl ? (
             <img
               src={user.avatarUrl}
               alt={user.displayName}
-              className="h-full w-full rounded-full object-cover"
+              className="h-full w-full object-cover"
             />
           ) : (
             user.displayName.charAt(0)
           )}
         </div>
-
-        <ChevronDown className="h-4 w-4 text-muted-foreground" />
       </button>
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-card text-card-foreground shadow-lg overflow-hidden z-50">
@@ -55,7 +76,7 @@ export const UserButton = ({ user }: { user: User }) => {
                 {user.displayName}
               </div>
               <div className="text-xs text-muted-foreground truncate">
-                @{user.username}
+                {user.username}
               </div>
             </div>
           </div>

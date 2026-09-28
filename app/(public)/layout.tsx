@@ -24,7 +24,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
         <Navbar />
 
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-360 p-10">{children}</div>
+          <div className="mx-auto w-full max-w-360 p-5">{children}</div>
         </main>
       </div>
     </div>
