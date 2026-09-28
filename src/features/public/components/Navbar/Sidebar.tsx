@@ -10,8 +10,6 @@ const logoutItem = navItems.find((item) => item.isLogout);
 const linkItems = navItems.filter((item) => !item.isLogout);
 const categories = [...new Set(linkItems.map((item) => item.category))];
 
-// Every query-param key used by a nav href (e.g. "subject"). Used so that
-// "Home" isn't highlighted while a subject filter is active.
 const queryKeys = new Set(
   linkItems.flatMap((item) => [
     ...new URLSearchParams(item.href?.split("?")[1] ?? "").keys(),
@@ -28,13 +26,10 @@ const activeClass = "bg-secondary text-secondary-foreground";
 const inactiveClass =
   "text-muted-foreground hover:bg-muted hover:text-foreground";
 
-function formatCount(n: number) {
-  return n >= 1000
-    ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`
-    : String(n);
-}
+const formatCount = (n: number) =>
+  n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k` : String(n);
 
-export function Sidebar() {
+export const Sidebar = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, logoutAction, isPending] = useActionState(logout, undefined);
@@ -129,4 +124,4 @@ export function Sidebar() {
       )}
     </aside>
   );
-}
+};

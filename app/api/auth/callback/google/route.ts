@@ -1,5 +1,5 @@
 import { db } from "@/src/db";
-import { oauthAccounts, users } from "@/src/db/schema";
+import { oauthAccounts, User, users } from "@/src/db/schema";
 import { google } from "@/src/lib/auth/oauth";
 import { createSession, setSessionCookie } from "@/src/lib/auth/session";
 import { generateUsername } from "@/src/lib/auth/username";
@@ -123,14 +123,19 @@ export const GET = async (req: NextRequest) => {
         const result = await db.transaction(async (tx) => {
           const [user] = await tx
             .insert(users)
-            .values({
-              username: await generateUsername(name ?? "user", normalizedEmail),
-              email: normalizedEmail,
-              passwordHash: null,
-              displayName: name ?? null,
-              avatarUrl: picture ?? null,
-              emailVerifiedAt: new Date(),
-            })
+            .values([
+              {
+                username: await generateUsername(
+                  name ?? "user",
+                  normalizedEmail,
+                ),
+                email: normalizedEmail,
+                passwordHash: null,
+                displayName: name ?? "User",
+                avatarUrl: picture ?? null,
+                emailVerifiedAt: new Date(),
+              },
+            ])
             .returning({
               id: users.id,
             });

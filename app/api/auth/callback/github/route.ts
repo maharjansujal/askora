@@ -148,17 +148,19 @@ export const GET = async (req: NextRequest) => {
         const result = await db.transaction(async (tx) => {
           const [user] = await tx
             .insert(users)
-            .values({
-              username: await generateUsername(
-                githubUser.name ?? githubUser.login,
-                normalizedEmail,
-              ),
-              email: normalizedEmail,
-              passwordHash: null,
-              displayName: githubUser.name ?? null,
-              avatarUrl: githubUser.avatar_url ?? null,
-              emailVerifiedAt: new Date(),
-            })
+            .values([
+              {
+                username: await generateUsername(
+                  githubUser.name ?? githubUser.login,
+                  normalizedEmail,
+                ),
+                email: normalizedEmail,
+                passwordHash: null,
+                displayName: githubUser.name ?? "User",
+                avatarUrl: githubUser.avatar_url ?? null,
+                emailVerifiedAt: new Date(),
+              },
+            ])
             .returning({
               id: users.id,
             });

@@ -46,9 +46,6 @@
     --background: #09090b;
     --foreground: #f8fafc;
 
-    --card: #18181b;
-    --card-foreground: #f8fafc;
-
     --popover: #18181b;
     --popover-foreground: #f8fafc;
 
@@ -58,7 +55,10 @@
     --secondary: #27272a;
     --secondary-foreground: #e0e7ff;
 
-    --muted: #18181b;
+    --card: #18181b;
+    --card-foreground: #f8fafc;
+
+    --muted: #27272a; /* changed from #18181b */
     --muted-foreground: #a1a1aa;
 
     --accent: #fbbf24;
