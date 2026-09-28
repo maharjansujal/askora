@@ -1,46 +1,34 @@
-import { Clock, File, LogOut, LucideIcon, PowerOff, User } from "lucide-react";
-import { IconType } from "react-icons";
-import { RiDashboard3Line } from "react-icons/ri";
-
 type NavItem = {
   label: string;
-  href?: string;
-  category: string;
+  href: string;
   count?: number;
-  icon?: LucideIcon | IconType;
   isLogout?: boolean;
 };
 
-export const navItems: NavItem[] = [
+type NavSection = {
+  category: string;
+  items: NavItem[];
+};
+
+export const navItems: NavSection[] = [
   {
-    label: "Home",
-    href: "/dashboard",
-    category: "Discover",
-    icon: RiDashboard3Line,
+    category: "Feed",
+    items: [
+      { label: "Home", href: "/dashboard" },
+      { label: "Recent", href: "/recent" },
+      { label: "Bookmarks", href: "/bookmarks" },
+    ],
   },
   {
-    label: "Recent",
-    href: "/admin/recent",
-    category: "Discover",
-    icon: Clock,
+    category: "Yours",
+    items: [
+      { label: "My questions", href: "/my-questions" },
+      { label: "My answers", href: "/my-answers" },
+      { label: "Bookmarked", href: "/bookmarks" },
+    ],
   },
   {
-    label: "Unanswered",
-    href: "/admin/unanswered",
-    category: "Discover",
-    icon: PowerOff,
-  },
-  {
-    label: "My Questions",
-    href: "/admin/my-questions",
-    category: "Discover",
-    icon: File,
-  },
-  {
-    label: "Logout",
-    href: "/login",
     category: "Platform",
-    icon: LogOut,
-    isLogout: true,
+    items: [{ label: "Logout", href: "/login", isLogout: true }],
   },
 ];
