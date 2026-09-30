@@ -67,3 +67,5 @@ export const userStats = pgTable("user_stats", {
     .defaultNow()
     .notNull(),
 });
+
+export type UserStat = typeof userStats.$inferSelect;

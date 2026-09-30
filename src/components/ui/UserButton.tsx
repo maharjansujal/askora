@@ -105,7 +105,10 @@ export const UserButton = ({ user }: { user: User }) => {
           <MenuItem
             icon={UserIcon}
             label="Your profile"
-            onClick={() => router.push("/profile")}
+            onClick={() => {
+              setIsOpen(false);
+              router.push("/profile");
+            }}
           />
           <MenuItem icon={Trophy} label="Your questions & answers" />
           <MenuItem icon={Settings} label="Account settings" />

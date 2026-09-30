@@ -1,3 +1,4 @@
+import { Button } from "@/src/components/ui/Button";
 import { User } from "@/src/db/schema";
 import { CalendarDays, Clock } from "lucide-react";
 
@@ -51,14 +52,7 @@ export const ProfileHeader = ({
         </div>
       </div>
 
-      {isOwner && (
-        <button
-          type="button"
-          className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-        >
-          Edit profile
-        </button>
-      )}
+      {isOwner && <Button variant="outline">Edit profile</Button>}
     </div>
   </section>
 );
