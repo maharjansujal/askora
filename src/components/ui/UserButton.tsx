@@ -9,6 +9,7 @@ import {
   Trophy,
   User as UserIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export const UserButton = ({ user }: { user: User }) => {
@@ -31,6 +32,8 @@ export const UserButton = ({ user }: { user: User }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const router = useRouter();
 
   return (
     <div ref={userButtonRef} className="relative inline-block">
@@ -99,7 +102,11 @@ export const UserButton = ({ user }: { user: User }) => {
 
         {/* Menu items */}
         <nav className="py-1">
-          <MenuItem icon={UserIcon} label="Your profile" />
+          <MenuItem
+            icon={UserIcon}
+            label="Your profile"
+            onClick={() => router.push("/profile")}
+          />
           <MenuItem icon={Trophy} label="Your questions & answers" />
           <MenuItem icon={Settings} label="Account settings" />
         </nav>
@@ -115,6 +122,7 @@ export const UserButton = ({ user }: { user: User }) => {
 type MenuItemProps = {
   icon: LucideIcon;
   label: string;
+  onClick?: () => void;
   destructive?: boolean;
 };
 
@@ -122,9 +130,11 @@ const MenuItem = ({
   icon: Icon,
   label,
   destructive = false,
+  onClick,
 }: MenuItemProps) => (
   <button
     type="button"
+    onClick={() => onClick?.()}
     className={clsx(
       "flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors",
       "hover:bg-muted",

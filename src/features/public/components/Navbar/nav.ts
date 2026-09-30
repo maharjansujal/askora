@@ -22,6 +22,7 @@ export const navItems: NavSection[] = [
   {
     category: "Yours",
     items: [
+      { label: "Profile", href: "/profile" },
       { label: "My questions", href: "/my-questions" },
       { label: "My answers", href: "/my-answers" },
       { label: "Bookmarked", href: "/bookmarks" },
