@@ -6,7 +6,9 @@ import { eq, gt } from "drizzle-orm";
 import { ProfileDto, RankRequirementProgressDto } from "../types/profileDto";
 import { labelForRequirement, statsFor } from "../store/utils";
 
-export const getUserProfile = async (username: string) => {
+export const getUserProfile = async (
+  username: string,
+): Promise<ProfileDto | null> => {
   // User with their current rank
   const row = await db
     .select({

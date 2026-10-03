@@ -1,5 +1,6 @@
 import {
   check,
+  date,
   index,
   integer,
   pgTable,
@@ -61,6 +62,11 @@ export const userStats = pgTable("user_stats", {
   downvotesReceived: integer("downvotes_received").notNull().default(0),
   pointsEarned: integer("points_earned").notNull().default(0),
   pointsSpent: integer("points_spent").notNull().default(0),
+
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastActivityDate: date("last_activity_date"),
+
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
   })

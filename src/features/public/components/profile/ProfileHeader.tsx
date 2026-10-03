@@ -17,7 +17,7 @@ export const ProfileHeader = ({
         {profile.avatarUrl ? (
           <img
             src={profile.avatarUrl}
-            alt={profile.displayName}
+            alt={profile.displayName.charAt(0)}
             className="size-full rounded-full object-cover"
           />
         ) : (
