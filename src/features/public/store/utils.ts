@@ -31,3 +31,14 @@ export const statsFor = (type: string, stats: UserStat) => {
       return 0;
   }
 };
+
+export const prepareUpdatePayload = (frontendData: FormData) => {
+  let obj = Object.fromEntries(frontendData);
+  let returnObj = {} as typeof obj;
+  for (let i in obj) {
+    if (obj[i] !== "") {
+      returnObj[i] = obj[i];
+    }
+  }
+  return returnObj;
+};

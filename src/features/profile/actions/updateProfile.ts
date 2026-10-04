@@ -1,5 +1,7 @@
 "use server";
 
+import { prepareUpdatePayload } from "../../public/store/utils";
+
 export type UpdateProfileState =
   | {
       success: boolean;
@@ -11,12 +13,9 @@ export const updateProfile = async (
   _prevState: UpdateProfileState,
   formData: FormData,
 ) => {
-  console.log("updateProfile formData:", {
-    displayName: formData.get("displayName"),
-    username: formData.get("username"),
-    bio: formData.get("bio"),
-    avatar: formData.get("avatar"), // a File when selected
-  });
+  const updatePayload = prepareUpdatePayload(formData);
+
+  console.log(updatePayload);
 
   return { success: true, error: undefined };
 };

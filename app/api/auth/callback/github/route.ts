@@ -1,8 +1,9 @@
 import { db } from "@/src/db";
-import { oauthAccounts, users } from "@/src/db/schema";
+import { oauthAccounts, ranks, users } from "@/src/db/schema";
 import { github } from "@/src/lib/auth/oauth";
 import { createSession, setSessionCookie } from "@/src/lib/auth/session";
 import { generateUsername } from "@/src/lib/auth/username";
+import { uploadRemoteFile } from "@/src/lib/cloudinary";
 import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -114,9 +115,13 @@ export const GET = async (req: NextRequest) => {
           ),
         );
     } else {
+      // NOTE: now also selecting avatarUrl — same reasoning as the Google
+      // callback: this is what lets us decide whether to mirror the
+      // provider's avatar to Cloudinary.
       const [existingUser] = await db
         .select({
           id: users.id,
+          avatarUrl: users.avatarUrl,
         })
         .from(users)
         .where(sql`lower(${users.email}) = ${normalizedEmail}`)
@@ -125,14 +130,31 @@ export const GET = async (req: NextRequest) => {
       if (existingUser) {
         userId = existingUser.id;
 
+        let avatarUpdate: { avatarUrl?: string; avatarPublicId?: string } = {};
+
+        if (!existingUser.avatarUrl && githubUser.avatar_url) {
+          try {
+            const uploaded = await uploadRemoteFile(githubUser.avatar_url, {
+              folder: "avatars",
+              publicId: userId,
+            });
+            avatarUpdate = {
+              avatarUrl: uploaded.fileUrl,
+              avatarPublicId: uploaded.publicId,
+            };
+          } catch (err) {
+            console.error("Cloudinary avatar upload failed (github)", err);
+          }
+        }
+
         await db.transaction(async (tx) => {
           await tx
             .update(users)
             .set({
               displayName: githubUser.name ?? undefined,
-              avatarUrl: githubUser.avatar_url ?? undefined,
               emailVerifiedAt: sql`coalesce(${users.emailVerifiedAt}, now())`,
               updatedAt: new Date(),
+              ...avatarUpdate,
             })
             .where(eq(users.id, userId));
 
@@ -145,11 +167,43 @@ export const GET = async (req: NextRequest) => {
           });
         });
       } else {
+        // Brand-new user: always mirror the provider's avatar, if present.
+        let avatarUrl: string | null = null;
+        let avatarPublicId: string | null = null;
+
+        const newUserId = crypto.randomUUID();
+
+        if (githubUser.avatar_url) {
+          try {
+            const uploaded = await uploadRemoteFile(githubUser.avatar_url, {
+              folder: "avatars",
+              publicId: newUserId,
+            });
+            avatarUrl = uploaded.fileUrl;
+            avatarPublicId = uploaded.publicId;
+          } catch (err) {
+            console.error(
+              "Cloudinary avatar upload failed (github, new user)",
+              err,
+            );
+          }
+        }
+
         const result = await db.transaction(async (tx) => {
+          const [newcomerRank] = await tx
+            .select({ id: ranks.id })
+            .from(ranks)
+            .where(eq(ranks.level, 1))
+            .limit(1);
+
+          if (!newcomerRank) {
+            throw new Error("Default rank (level 1) not found");
+          }
           const [user] = await tx
             .insert(users)
             .values([
               {
+                id: newUserId,
                 username: await generateUsername(
                   githubUser.name ?? githubUser.login,
                   normalizedEmail,
@@ -157,7 +211,9 @@ export const GET = async (req: NextRequest) => {
                 email: normalizedEmail,
                 passwordHash: null,
                 displayName: githubUser.name ?? "User",
-                avatarUrl: githubUser.avatar_url ?? null,
+                avatarUrl,
+                avatarPublicId,
+                rankId: newcomerRank.id,
                 emailVerifiedAt: new Date(),
               },
             ])

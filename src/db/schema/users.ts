@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { roleEnum, userStatusEnum } from "./enums";
 import { InferSelectModel, sql } from "drizzle-orm";
+import { ranks } from "./ranks";
 
 export const users = pgTable(
   "users",
@@ -22,10 +23,13 @@ export const users = pgTable(
 
     displayName: text("display_name").notNull(),
     avatarUrl: text("avatar_url"),
+    avatarPublicId: text("avatar_public_id"),
     bio: text("bio"),
 
     role: roleEnum("role").notNull().default("USER"),
-    rankId: uuid("rank_id"),
+    rankId: uuid("rank_id").references(() => ranks.id, {
+      onDelete: "restrict",
+    }),
     pointsBalance: integer("points_balance").notNull().default(0),
 
     status: userStatusEnum("status").notNull().default("ACTIVE"),

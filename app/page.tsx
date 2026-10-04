@@ -2,11 +2,10 @@ import { getCurrentUser } from "@/src/lib/auth/session";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  // TODO: Get the current authenticated user
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?clear_session=1");
   }
 
   // TODO: Replace this with your actual role check

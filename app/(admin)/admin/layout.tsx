@@ -8,11 +8,11 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   const { user, authorized } = await requireRole("ADMIN");
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?clear_session=1");
   }
 
   if (!authorized) {
-    redirect("/dashboard");
+    redirect("/admin/dashboard");
   }
 
   return (

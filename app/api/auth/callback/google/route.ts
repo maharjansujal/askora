@@ -1,8 +1,9 @@
 import { db } from "@/src/db";
-import { oauthAccounts, User, users } from "@/src/db/schema";
+import { oauthAccounts, ranks, users } from "@/src/db/schema";
 import { google } from "@/src/lib/auth/oauth";
 import { createSession, setSessionCookie } from "@/src/lib/auth/session";
 import { generateUsername } from "@/src/lib/auth/username";
+import { uploadRemoteFile } from "@/src/lib/cloudinary";
 import { decodeIdToken } from "arctic";
 import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -92,6 +93,7 @@ export const GET = async (req: NextRequest) => {
       const [existingUser] = await db
         .select({
           id: users.id,
+          avatarUrl: users.avatarUrl,
         })
         .from(users)
         .where(sql`lower(${users.email}) = ${normalizedEmail}`)
@@ -100,14 +102,33 @@ export const GET = async (req: NextRequest) => {
       if (existingUser) {
         userId = existingUser.id;
 
+        let avatarUpdate: { avatarUrl?: string; avatarPublicId?: string } = {};
+
+        if (!existingUser.avatarUrl && picture) {
+          try {
+            const uploaded = await uploadRemoteFile(picture, {
+              folder: "avatars",
+              publicId: userId,
+            });
+            avatarUpdate = {
+              avatarUrl: uploaded.fileUrl,
+              avatarPublicId: uploaded.publicId,
+            };
+          } catch (err) {
+            // Don't fail the whole login just because the avatar mirror
+            // if failed log it and move on without an avatar.
+            console.error("Cloudinary avatar upload failed (google)", err);
+          }
+        }
+
         await db.transaction(async (tx) => {
           await tx
             .update(users)
             .set({
-              avatarUrl: picture ?? undefined,
               displayName: name ?? undefined,
               emailVerifiedAt: sql`coalesce(${users.emailVerifiedAt}, now())`,
               updatedAt: new Date(),
+              ...avatarUpdate,
             })
             .where(eq(users.id, userId));
 
@@ -120,11 +141,45 @@ export const GET = async (req: NextRequest) => {
           });
         });
       } else {
+        // Brand-new user: avatarUrl can't already exist, so always mirror
+        // the provider's picture to Cloudinary (if one was provided).
+        let avatarUrl: string | null = null;
+        let avatarPublicId: string | null = null;
+
+        const newUserId = crypto.randomUUID();
+
+        if (picture) {
+          try {
+            const uploaded = await uploadRemoteFile(picture, {
+              folder: "avatars",
+              publicId: newUserId,
+            });
+            avatarUrl = uploaded.fileUrl;
+            avatarPublicId = uploaded.publicId;
+          } catch (err) {
+            console.error(
+              "Cloudinary avatar upload failed (google, new user)",
+              err,
+            );
+          }
+        }
+
         const result = await db.transaction(async (tx) => {
+          const [newcomerRank] = await tx
+            .select({ id: ranks.id })
+            .from(ranks)
+            .where(eq(ranks.level, 1))
+            .limit(1);
+
+          if (!newcomerRank) {
+            throw new Error("Default rank (level 1) not found");
+          }
+
           const [user] = await tx
             .insert(users)
             .values([
               {
+                id: newUserId,
                 username: await generateUsername(
                   name ?? "user",
                   normalizedEmail,
@@ -132,7 +187,9 @@ export const GET = async (req: NextRequest) => {
                 email: normalizedEmail,
                 passwordHash: null,
                 displayName: name ?? "User",
-                avatarUrl: picture ?? null,
+                avatarUrl,
+                avatarPublicId,
+                rankId: newcomerRank.id,
                 emailVerifiedAt: new Date(),
               },
             ])
