@@ -3,7 +3,7 @@ import { RankRequirementType, Role, UserStatus } from "@/src/db/schema";
 export interface ProfileDto {
   id: string;
   username: string;
-  displayName: string | null;
+  displayName: string;
   avatarUrl: string | null;
   bio: string | null;
   role: Role;
@@ -13,7 +13,7 @@ export interface ProfileDto {
 
   pointsBalance: number;
 
-  rank: RankSummaryDto | null;
+  rank: RankSummaryDto;
   nextRank: NextRankDto | null;
 
   stats: ProfileStatsDto;

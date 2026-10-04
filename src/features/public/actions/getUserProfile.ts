@@ -90,7 +90,7 @@ export const getUserProfile = async (
     rank:
       row.rankId && row.rankName && row.rankLevel != null
         ? { id: row.rankId, name: row.rankName, level: row.rankLevel }
-        : null,
+        : { id: "", name: "Learner", level: 1 },
     nextRank,
     stats: stats
       ? {

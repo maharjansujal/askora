@@ -6,13 +6,14 @@ import { useModal } from "@/src/components/ui/Modal/useModal";
 import { User } from "@/src/db/schema";
 import { CalendarDays, Clock } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
+import { ProfileDto } from "../../public/types/profileDto";
 
 export const ProfileHeader = ({
   isOwner,
   profile,
 }: {
   isOwner: boolean;
-  profile: User;
+  profile: ProfileDto;
 }) => {
   const profileFormModal = useModal();
   return (
@@ -38,7 +39,7 @@ export const ProfileHeader = ({
               {profile.displayName}
             </h1>
             <span className="rounded-full border border-primary/30 bg-primary/15 px-2.5 py-0.5 text-[11px] font-bold text-primary">
-              {profile.rankId}
+              {profile.rank.name}
             </span>
           </div>
           <div className="mb-2 text-[13.5px] text-muted-foreground">
