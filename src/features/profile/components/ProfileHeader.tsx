@@ -7,6 +7,7 @@ import { User } from "@/src/db/schema";
 import { CalendarDays, Clock } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileDto } from "../../public/types/profileDto";
+import { useRouter } from "next/navigation";
 
 export const ProfileHeader = ({
   isOwner,
@@ -16,6 +17,14 @@ export const ProfileHeader = ({
   profile: ProfileDto;
 }) => {
   const profileFormModal = useModal();
+  const router = useRouter();
+
+  const handleProfileUpdated = (username: string) => {
+    profileFormModal.closeModal();
+
+    router.replace(`/profile/${username}`);
+    router.refresh();
+  };
   return (
     <section className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
       <div className="h-22 bg-linear-to-r from-primary/40 to-purple-300/25" />
@@ -73,7 +82,7 @@ export const ProfileHeader = ({
       >
         <ProfileForm
           {...profile}
-          // onSubmit={profileFormModal.closeModal}
+          onSuccess={handleProfileUpdated}
           onCancel={profileFormModal.closeModal}
         />
       </Modal>

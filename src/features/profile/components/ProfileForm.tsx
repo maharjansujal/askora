@@ -1,4 +1,6 @@
-import React, { useActionState, useRef, useState } from "react";
+"use client";
+
+import React, { useActionState, useEffect, useRef, useState } from "react";
 import { updateProfile, UpdateProfileState } from "../actions/updateProfile";
 import { FormField } from "@/src/components/form/FormField";
 import { Input } from "@/src/components/form/Input";
@@ -11,7 +13,7 @@ interface ProfileFormProps {
   username: string;
   bio: string | null;
   avatarUrl: string | null;
-  onSubmit?: () => void;
+  onSuccess?: (username: string) => void;
   onCancel?: () => void;
 }
 
@@ -22,13 +24,18 @@ export const ProfileForm = ({
   username,
   bio,
   avatarUrl,
-  onSubmit,
+  onSuccess,
   onCancel,
 }: ProfileFormProps) => {
   const [state, formAction, isPending] = useActionState(
     updateProfile,
     initialState,
   );
+  useEffect(() => {
+    if (state?.success && state.username) {
+      onSuccess?.(state.username);
+    }
+  }, [state, onSuccess]);
   const [preview, setPreview] = useState<string | null>(avatarUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -116,7 +123,7 @@ export const ProfileForm = ({
         <Button type="button" variant="ghost" onClick={() => onCancel?.()}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isPending} onClick={() => onSubmit?.()}>
+        <Button type="submit" disabled={isPending}>
           {isPending ? "Saving…" : "Save changes"}
         </Button>
       </div>
