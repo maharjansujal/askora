@@ -1,5 +1,6 @@
-import { Navbar } from "@/src/features/public/components/Navbar/Navbar";
-import { Sidebar } from "@/src/features/public/components/Navbar/Sidebar";
+import { userNavItems } from "@/src/components/navigation/nav";
+import { Navbar } from "@/src/components/navigation/Navbar";
+import { Sidebar } from "@/src/components/navigation/Sidebar";
 import { requireRole } from "@/src/lib/auth/rbac";
 import { redirect } from "next/navigation";
 
@@ -17,7 +18,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex h-screen bg-background">
       {/* Left sidebar */}
-      <Sidebar />
+      <Sidebar navItems={userNavItems} />
 
       {/* Right side */}
       <div className="flex min-w-0 flex-1 flex-col">

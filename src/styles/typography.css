@@ -11,5 +11,5 @@ h3 {
 }
 
 p {
-  @apply text-base leading-7 text-muted-foreground;
+  @apply leading-7 text-muted-foreground;
 }

@@ -1,4 +1,4 @@
-import { ProfileHeader } from "@/src/features/public/components/profile/ProfileHeader";
+import { ProfileHeader } from "@/src/features/profile/components/ProfileHeader";
 import { getCurrentUser } from "@/src/lib/auth/session";
 
 export default async function ProfilePage() {

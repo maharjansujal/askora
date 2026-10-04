@@ -55,7 +55,7 @@ export const Modal = ({
 
   return (
     <div
-      className="fixed inset-0 z-999 flex items-center justify-center bg-background/40 p-4"
+      className="fixed inset-0 z-999 flex items-center justify-center bg-black/40 p-4"
       onMouseDown={(event) => {
         // Close when clicking the backdrop
         if (event.target === event.currentTarget) {
@@ -67,8 +67,7 @@ export const Modal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
-        className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-lg border border-border bg-surface text-primary shadow-xl"
-        onMouseDown={(event) => event.stopPropagation()}
+        className="flex max-h-[90vh] flex-col overflow-hidden rounded-sm border border-border bg-background text-card-foreground shadow-xl"
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-surface-hover px-4 py-3">
@@ -83,7 +82,7 @@ export const Modal = ({
           <button
             type="button"
             onClick={handleClose}
-            className="cursor-pointer rounded-md p-1 text-secondary transition-colors hover:bg-background/5 hover:text-primary"
+            className="cursor-pointer rounded-md p-1 text-foreground transition-colors hover:bg-background/5 hover:text-foreground/50"
             aria-label="Close modal"
           >
             <X size={20} />
@@ -91,7 +90,7 @@ export const Modal = ({
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto bg-surface">{children}</div>
+        <div className="overflow-y-auto bg-background">{children}</div>
       </div>
     </div>
   );
