@@ -3,11 +3,11 @@
 import { Button } from "@/src/components/ui/Button";
 import { Modal } from "@/src/components/ui/Modal/Modal";
 import { useModal } from "@/src/components/ui/Modal/useModal";
-import { User } from "@/src/db/schema";
 import { CalendarDays, Clock } from "lucide-react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileDto } from "../../public/types/profileDto";
 import { useRouter } from "next/navigation";
+import { formatLastSeen } from "../../public/store/utils";
 
 export const ProfileHeader = ({
   isOwner,
@@ -27,10 +27,10 @@ export const ProfileHeader = ({
   };
   return (
     <section className="mb-4 overflow-hidden rounded-xl border border-border bg-card">
-      <div className="h-22 bg-linear-to-r from-primary/40 to-purple-300/25" />
+      <div className="h-22" />
 
       <div className="flex flex-wrap items-end gap-4 px-6 pb-5">
-        <div className="-mt-10 flex size-20 shrink-0 items-center justify-center rounded-full border-4 border-card bg-linear-to-br from-primary to-purple-300 text-3xl font-extrabold text-primary-foreground">
+        <div className="-mt-10 flex size-20 shrink-0 items-center justify-center rounded-full border-4 border-card bg-linear-to-br from-primary to-primary/30 text-3xl font-extrabold text-primary-foreground">
           {profile.avatarUrl ? (
             <img
               src={profile.avatarUrl}
@@ -62,9 +62,12 @@ export const ProfileHeader = ({
               <CalendarDays className="size-3.5" /> Joined{" "}
               {String(profile.createdAt)}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="size-3.5" /> Last seen{" "}
-              {String(profile.lastSeenAt)}
+            <span
+              className="inline-flex items-center gap-1.5"
+              // title={new Date(profile.lastSeenAt).toLocaleString()}
+            >
+              <Clock className="size-3.5" />
+              Active {!isOwner ? formatLastSeen(profile.lastSeenAt) : "Now"}
             </span>
           </div>
         </div>

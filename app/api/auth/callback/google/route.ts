@@ -190,6 +190,7 @@ export const GET = async (req: NextRequest) => {
                 avatarUrl,
                 avatarPublicId,
                 rankId: newcomerRank.id,
+                pointsBalance: 100,
                 emailVerifiedAt: new Date(),
               },
             ])

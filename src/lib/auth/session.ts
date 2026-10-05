@@ -45,6 +45,9 @@ export const clearSessionCookie = async () => {
   store.delete(SESSION_COOKIE_NAME);
 };
 
+// How stale lastSeenAt has to be before we bother writing a fresh one.
+const LAST_SEEN_THROTTLE_MS = 5 * 60 * 1000;
+
 export const getCurrentUser = async () => {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE_NAME)?.value;
@@ -73,6 +76,17 @@ export const getCurrentUser = async () => {
     .set({ lastUsedAt: new Date() })
     .where(eq(sessions.id, session.id))
     .catch(() => {});
+
+  const lastSeenStale =
+    !user.lastSeenAt ||
+    Date.now() - user.lastSeenAt.getTime() > LAST_SEEN_THROTTLE_MS;
+
+  if (lastSeenStale) {
+    db.update(users)
+      .set({ lastSeenAt: new Date() })
+      .where(eq(users.id, user.id))
+      .catch(() => {});
+  }
 
   return user;
 };
