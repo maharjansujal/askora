@@ -27,9 +27,7 @@ export const subjects = pgTable(
 
     createdAt: timestamp("created_at", {
       withTimezone: true,
-    })
-      .defaultNow()
-      .notNull(),
+    }).defaultNow(),
   },
   (table) => [
     uniqueIndex("subjects_name_unique").on(table.name),
@@ -289,3 +287,5 @@ export const answerVotes = pgTable(
     index("answer_votes_user_idx").on(table.userId),
   ],
 );
+
+export type Subject = typeof subjects.$inferSelect;

@@ -52,3 +52,5 @@ export const canModifyContent = (
   contentAuthorId: string,
 ) =>
   currentUser.id === contentAuthorId || hasRole(currentUser.role, "MODERATOR");
+
+export const requireAdmin = async () => requireRole("ADMIN");
