@@ -289,3 +289,4 @@ export const answerVotes = pgTable(
 );
 
 export type Subject = typeof subjects.$inferSelect;
+export type Category = typeof categories.$inferSelect;

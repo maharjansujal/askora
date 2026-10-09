@@ -72,9 +72,9 @@ export const Modal = ({
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-surface-hover px-4 py-3">
           {title ? (
-            <h2 id="modal-title" className="font-semibold text-primary">
+            <p id="modal-title" className="font-semibold text-foreground">
               {title}
-            </h2>
+            </p>
           ) : (
             <div />
           )}

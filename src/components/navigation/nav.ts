@@ -102,9 +102,14 @@ export const adminNavItems: NavGroup[] = [
         // icon: Flag,
       },
       {
-        label: "Tags & Categories",
-        href: "/admin/tags-and-categories",
+        label: "Categories",
+        href: "/admin/categories",
         // icon: Tags,
+      },
+      {
+        label: "Subjects",
+        href: "/admin/subjects",
+        // icon: BookOpen,
       },
     ],
   },

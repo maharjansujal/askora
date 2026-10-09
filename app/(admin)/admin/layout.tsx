@@ -16,9 +16,14 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <main className="flex h-full bg-background">
+    <main className="min-h-screen bg-background lg:flex">
       <Sidebar navItems={adminNavItems} />
-      <div className="w-full max-w-360 p-20">{children}</div>
+
+      <div className="min-w-0 flex-1">
+        <div className="mx-auto w-full max-w-360 p-4 sm:p-6 lg:p-8">
+          {children}
+        </div>
+      </div>
     </main>
   );
 };

@@ -53,19 +53,19 @@ const sizes: Record<
   }
 > = {
   sm: {
-    className: "h-9 px-3 text-xs gap-1.5 rounded-md",
+    className: "h-9 px-3 text-xs gap-1.5 rounded-xs",
     iconSize: 14,
   },
   md: {
-    className: "h-10 px-4 text-sm gap-2 rounded-lg",
+    className: "h-10 px-4 text-sm gap-2 rounded-sm",
     iconSize: 16,
   },
   lg: {
-    className: "h-11 px-5 text-base gap-2.5 rounded-lg",
+    className: "h-11 px-5 text-base gap-2.5 rounded-sm",
     iconSize: 18,
   },
   xl: {
-    className: "h-12 px-6 text-base gap-3 rounded-xl",
+    className: "h-12 px-6 text-base gap-3 rounded-md",
     iconSize: 20,
   },
 };
