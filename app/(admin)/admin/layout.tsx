@@ -12,7 +12,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!authorized) {
-    redirect("/admin/dashboard");
+    redirect("/dashboard");
   }
 
   return (

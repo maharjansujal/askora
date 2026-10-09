@@ -1,6 +1,7 @@
 import { db } from "@/src/db";
 import { subjects } from "@/src/db/schema";
 import { requireAdmin } from "@/src/lib/auth/rbac";
+import { requireAdminApi } from "@/src/lib/auth/requireAdminApi";
 import { eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -26,20 +27,9 @@ const addSubjectSchema = z.object({
 });
 
 export const GET = async () => {
-  const { user, authorized } = await requireAdmin();
-  if (!user) {
-    return NextResponse.json(
-      { message: "User not authenticated" },
-      { status: 401 },
-    );
-  }
+  const authResponse = await requireAdminApi();
 
-  if (!authorized) {
-    return NextResponse.json(
-      { message: "You are not allowed to perform this operation" },
-      { status: 403 },
-    );
-  }
+  if (authResponse) return authResponse;
 
   try {
     const data = await db.select().from(subjects);
