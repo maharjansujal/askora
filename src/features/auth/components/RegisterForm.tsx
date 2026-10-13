@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/form/Input";
 import { register, type RegisterState } from "../actions/register";
+import { FormField } from "@/src/components/form/FormField";
 
 const initialState: RegisterState = {};
 
@@ -23,52 +24,50 @@ export const RegisterForm = () => {
 
   return (
     <form action={formAction} className="space-y-5">
-      <Input
-        id="username"
-        name="username"
-        label="Username"
-        placeholder="Enter your username"
-        autoComplete="username"
-        disabled={isPending}
-      />
-
-      <Input
-        id="email"
-        name="email"
-        type="email"
-        label="Email"
-        placeholder="you@example.com"
-        autoComplete="email"
-        disabled={isPending}
-      />
-
-      <Input
-        id="displayName"
-        name="displayName"
-        type="text"
-        label="Display Name"
-        placeholder="Your Name"
-        disabled={isPending}
-      />
-
-      <Input
-        id="password"
-        name="password"
-        type="password"
-        label="Password"
-        placeholder="Enter your password"
-        autoComplete="new-password"
-        disabled={isPending}
-      />
-
+      <FormField label="Username" htmlFor="username">
+        <Input
+          id="username"
+          name="username"
+          placeholder="Enter your username"
+          autoComplete="username"
+          disabled={isPending}
+        />
+      </FormField>
+      <FormField label="Email" htmlFor="email">
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          disabled={isPending}
+        />
+      </FormField>
+      <FormField label="Display name" htmlFor="displayName">
+        <Input
+          id="displayName"
+          name="displayName"
+          type="text"
+          placeholder="Your Name"
+          disabled={isPending}
+        />
+      </FormField>
+      <FormField label="Password" htmlFor="password">
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Enter your password"
+          autoComplete="new-password"
+          disabled={isPending}
+        />
+      </FormField>
       {state.error && <p className="text-sm text-destructive">{state.error}</p>}
-
       <Button type="submit" loading={isPending} className="w-full">
         Create account
       </Button>
-
       <p className="text-center font-sans text-[13px] text-muted-foreground">
-        Already have an account?{" "}
+        Already have an account?
         <Link
           href="/login"
           className="font-medium text-primary transition-colors hover:text-primary/80"

@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/form/Input";
 import { login, type LoginState } from "../actions/login";
+import { FormField } from "@/src/components/form/FormField";
 
 const initialState: LoginState = {};
 
@@ -14,25 +15,26 @@ export const LoginForm = () => {
 
   return (
     <form action={formAction} className="w-full space-y-5">
-      <Input
-        id="identifier"
-        name="identifier"
-        type="text"
-        label="Email or username"
-        placeholder="you@example.com or username"
-        autoComplete="username"
-        disabled={loading}
-      />
-
-      <Input
-        id="password"
-        name="password"
-        type="password"
-        label="Password"
-        placeholder="••••••••"
-        autoComplete="current-password"
-        disabled={loading}
-      />
+      <FormField label="Email or username" htmlFor="identifier">
+        <Input
+          id="identifier"
+          name="identifier"
+          type="text"
+          placeholder="you@example.com or username"
+          autoComplete="username"
+          disabled={loading}
+        />
+      </FormField>
+      <FormField label="Password" htmlFor="password">
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          autoComplete="current-password"
+          disabled={loading}
+        />
+      </FormField>
 
       {state.error && <p className="text-sm text-red-500">{state.error}</p>}
 

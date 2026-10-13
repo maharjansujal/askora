@@ -1,12 +1,11 @@
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-interface FormFieldProps {
+interface FormFieldProps extends ComponentPropsWithoutRef<"label"> {
   label?: string;
   required?: boolean;
   error?: string;
   message?: string;
   children: ReactNode;
-  className?: string;
 }
 
 export const FormField = ({
