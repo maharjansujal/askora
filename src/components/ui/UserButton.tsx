@@ -1,6 +1,7 @@
 "use client";
 
 import { User } from "@/src/db/schema";
+import { logout } from "@/src/features/auth/actions/logout";
 import { clsx } from "clsx";
 import {
   LogOut,
@@ -10,11 +11,12 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 export const UserButton = ({ user }: { user: User }) => {
   const [isOpen, setIsOpen] = useState(false);
   const userButtonRef = useRef<HTMLDivElement>(null);
+  const [_, logoutAction, isPending] = useActionState(logout, undefined);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -115,7 +117,21 @@ export const UserButton = ({ user }: { user: User }) => {
         </nav>
 
         <div className="border-t border-border py-1">
-          <MenuItem icon={LogOut} label="Log out" destructive />
+          <MenuItem
+            icon={LogOut}
+            label="Log out"
+            onClick={logout}
+            destructive
+          />
+        </div>
+        <div className="border-t border-border py-1">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 5 px-4 py-2 text-left text-sm transition-colors text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-4 h-4" />
+            {isPending ? "Logging out..." : "Log out"}
+          </button>
         </div>
       </div>
     </div>

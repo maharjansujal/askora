@@ -1,6 +1,5 @@
 import { db } from "@/src/db";
 import { categories } from "@/src/db/schema";
-import { requireAdmin } from "@/src/lib/auth/rbac";
 import { requireAdminApi } from "@/src/lib/auth/requireAdminApi";
 import { and, eq, ne, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -35,22 +34,6 @@ export const PATCH = async (
   const authResponse = await requireAdminApi();
   if (authResponse) return authResponse;
   try {
-    const { user, authorized } = await requireAdmin();
-
-    if (!user) {
-      return NextResponse.json(
-        { message: "User not authenticated" },
-        { status: 401 },
-      );
-    }
-
-    if (!authorized) {
-      return NextResponse.json(
-        { message: "You are not allowed to perform this operation" },
-        { status: 403 },
-      );
-    }
-
     const body = await req.json();
     const parsed = updateCategorySchema.safeParse(body);
 

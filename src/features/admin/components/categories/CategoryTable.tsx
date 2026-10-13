@@ -12,8 +12,8 @@ import {
 interface CategoriesTableProps {
   data: Category[];
   isLoading: boolean;
-  onEdit: (subject: Category) => void;
-  onDelete: (subject: Category) => Promise<void>;
+  onEdit: (category: Category) => void;
+  onDelete: (category: Category) => Promise<void>;
 }
 
 export const CategoriesTable = ({
