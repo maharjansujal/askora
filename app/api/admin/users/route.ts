@@ -135,6 +135,7 @@ export async function POST(req: NextRequest) {
           bio: bio || null,
           role,
           emailVerifiedAt: emailVerified ? new Date() : null,
+          pointsBalance: 100,
         })
         .returning({
           id: users.id,

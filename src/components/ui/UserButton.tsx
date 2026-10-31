@@ -71,37 +71,6 @@ export const UserButton = ({ user }: { user: User }) => {
             : "pointer-events-none -translate-y-2 opacity-0 scale-95",
         )}
       >
-        {/* Identity header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary to-purple-300 flex items-center justify-center text-sm font-bold text-primary-foreground shrink-0">
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.displayName}
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              user.displayName.charAt(0)
-            )}
-          </div>
-          <div className="min-w-0">
-            <div className="text-sm font-semibold truncate">
-              {user.displayName}
-            </div>
-            <div className="text-xs text-muted-foreground truncate">
-              {user.username}
-            </div>
-          </div>
-        </div>
-
-        {/* Points balance */}
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Points balance</span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/15 px-2.5 py-1 text-xs font-bold text-accent">
-            ✦ {user.pointsBalance}
-          </span>
-        </div>
-
         {/* Menu items */}
         <nav className="py-1">
           <MenuItem
@@ -112,26 +81,23 @@ export const UserButton = ({ user }: { user: User }) => {
               router.push("/profile");
             }}
           />
+
           <MenuItem icon={Trophy} label="Your questions & answers" />
           <MenuItem icon={Settings} label="Account settings" />
         </nav>
 
+        {/* Logout */}
         <div className="border-t border-border py-1">
-          <MenuItem
-            icon={LogOut}
-            label="Log out"
-            onClick={logout}
-            destructive
-          />
-        </div>
-        <div className="border-t border-border py-1">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 5 px-4 py-2 text-left text-sm transition-colors text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="w-4 h-4" />
-            {isPending ? "Logging out..." : "Log out"}
-          </button>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="w-4 h-4" />
+              {isPending ? "Logging out..." : "Log out"}
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -142,24 +108,16 @@ type MenuItemProps = {
   icon: LucideIcon;
   label: string;
   onClick?: () => void;
-  destructive?: boolean;
 };
 
-const MenuItem = ({
-  icon: Icon,
-  label,
-  destructive = false,
-  onClick,
-}: MenuItemProps) => (
+const MenuItem = ({ icon: Icon, label, onClick }: MenuItemProps) => (
   <button
     type="button"
     onClick={() => onClick?.()}
     className={clsx(
       "flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors",
       "hover:bg-muted",
-      destructive
-        ? "text-destructive hover:bg-destructive/10"
-        : "text-foreground hover:text-primary",
+      "text-foreground hover:text-primary",
     )}
   >
     <Icon className="h-4 w-4" />

@@ -63,6 +63,7 @@ export async function register(
         email: normalizedEmail.trim().toLowerCase(),
         displayName: normalizedDisplayName.trim(),
         passwordHash,
+        pointsBalance: 100,
       })
       .returning({
         id: users.id,

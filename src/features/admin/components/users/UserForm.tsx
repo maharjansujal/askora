@@ -57,7 +57,7 @@ export function UserForm({ onSuccess, editingUser }: UserFormProps) {
           id: editingUser.id,
           ...payload,
         });
-        alert.success("Updated student successfully");
+        alert.success("Updated user successfully");
       } else {
         await createUser(payload);
         alert.success("User created successfully");
@@ -86,10 +86,10 @@ export function UserForm({ onSuccess, editingUser }: UserFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-5 p-10"
+      className="flex flex-col gap-5 p-10 w-full"
     >
       <FormField
-        label="Student Name"
+        label="Display Name"
         error={errors.displayName?.message}
         required
       >

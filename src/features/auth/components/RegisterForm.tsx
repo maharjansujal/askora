@@ -67,7 +67,7 @@ export const RegisterForm = () => {
         Create account
       </Button>
       <p className="text-center font-sans text-[13px] text-muted-foreground">
-        Already have an account?
+        Already have an account?{" "}
         <Link
           href="/login"
           className="font-medium text-primary transition-colors hover:text-primary/80"
