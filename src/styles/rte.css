@@ -1,0 +1,142 @@
+/* ==========================================================================
+   Rich Text Editor (ProseMirror)
+   All styling is namespaced under `.rte-*` so it never leaks.
+   Uses your existing CSS custom properties (--foreground, --muted, etc.)
+   ========================================================================== */
+
+.rte-host {
+  position: relative;
+}
+
+.rte-content {
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--foreground);
+  outline: none;
+  word-wrap: break-word;
+}
+
+.rte-content:focus {
+  outline: none;
+}
+
+/* Placeholder: only show when doc has a single empty paragraph */
+.rte-content.ProseMirror-empty::before,
+.rte-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  position: absolute;
+}
+
+.rte-content p {
+  margin: 0 0 0.5em;
+}
+.rte-content p:last-child {
+  margin-bottom: 0;
+}
+
+.rte-content h1,
+.rte-content h2,
+.rte-content h3 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 1em 0 0.4em;
+}
+.rte-content h1 {
+  font-size: 1.5rem;
+}
+.rte-content h2 {
+  font-size: 1.25rem;
+}
+.rte-content h3 {
+  font-size: 1.125rem;
+}
+
+.rte-content strong {
+  font-weight: 700;
+}
+.rte-content em {
+  font-style: italic;
+}
+
+.rte-content .rte-inline-code,
+.rte-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.rte-content pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+  padding: 0.75em 1em;
+  margin: 0.75em 0;
+  border-radius: 6px;
+  background: var(--muted);
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+.rte-content pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+
+.rte-content blockquote {
+  margin: 0.75em 0;
+  padding: 0.25em 0 0.25em 1em;
+  border-left: 3px solid var(--border);
+  color: var(--muted-foreground);
+}
+
+.rte-content ul,
+.rte-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+.rte-content ul {
+  list-style: disc;
+}
+.rte-content ol {
+  list-style: decimal;
+}
+.rte-content li {
+  margin: 0.15em 0;
+}
+.rte-content li > p {
+  margin: 0;
+}
+
+.rte-content .rte-image,
+.rte-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 0.5em 0;
+}
+
+.rte-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25em 0;
+}
+
+.rte-content a,
+.rte-content .rte-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Read-only viewer strips any hover/selection artifacts */
+.rte-viewer .rte-content {
+  padding: 0;
+}
+.rte-viewer .ProseMirror {
+  user-select: text;
+}

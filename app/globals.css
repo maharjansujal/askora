@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../src/styles/typography.css";
+@import "../src/styles/rte.css";
 @font-face {
   font-family: "Work Sans";
   src: url("/worksans.ttf");
