@@ -2,6 +2,7 @@ import { db } from "@/src/db";
 import { users } from "@/src/db/schema";
 import { sendVerificationEmail } from "@/src/lib/mailer";
 import { issueEmailVerificationCode } from "@/src/lib/otp";
+import { isResendCooldownError } from "@/src/lib/otp/errors";
 import { resendCodeSchema } from "@/src/lib/validation/auth";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
@@ -33,13 +34,30 @@ export const POST = async (req: NextRequest) => {
     );
   }
 
+  let code: string;
   try {
-    const code = await issueEmailVerificationCode(user.id);
+    code = await issueEmailVerificationCode(user.id);
+  } catch (err) {
+    if (isResendCooldownError(err)) {
+      return NextResponse.json(
+        { error: err.message, waitSeconds: err.waitSeconds },
+        { status: 429 },
+      );
+    }
+    console.error("issueEmailVerificationCode failed", err);
+    return NextResponse.json(
+      { error: "Could not generate code" },
+      { status: 500 },
+    );
+  }
+
+  try {
     await sendVerificationEmail(user.email, code);
   } catch (err) {
+    console.error("sendVerificationEmail failed", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Could not send code" },
-      { status: 429 },
+      { error: "Could not send email" },
+      { status: 502 },
     );
   }
 

@@ -7,7 +7,7 @@ export const GET = async () => {
   const state = generateState();
 
   // GitHub doesn't support PKCE, so no code verifier needed
-  const url = github.createAuthorizationURL(state, ["user:email"]);
+  const url = github.createAuthorizationURL(state, ["user:email", "read:user"]);
 
   const cookieStore = await cookies();
 

@@ -3,7 +3,7 @@ import { users } from "@/src/db/schema";
 import { sql } from "drizzle-orm";
 
 export const generateUsername = async (name: string | null, email: string) => {
-  const base = name
+  const raw = name
     ? name
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "_")
@@ -15,6 +15,9 @@ export const generateUsername = async (name: string | null, email: string) => {
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "_")
         .slice(0, 20);
+
+  const base =
+    raw.length >= 3 ? raw : `user_${Math.random().toString(36).slice(2, 8)}`;
 
   const [existing] = await db
     .select({ id: users.id })

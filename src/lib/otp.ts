@@ -3,10 +3,11 @@ import { db } from "../db";
 import { users, verificationCodes } from "../db/schema";
 import { and, desc, eq, gt, isNull, lt, sql } from "drizzle-orm";
 import { sha256 } from "./auth/password";
+import { ResendCooldownError } from "./otp/errors";
 
-const CODE_TTL_MS = 1000 * 60 * 10; // 10 minutes
+const CODE_TTL_MS = 1000 * 60 * 10;
 const MAX_ATTEMPTS = 5;
-const RESEND_COOLDOWN_MS = 1000 * 60; // 1 minute between resends
+const RESEND_COOLDOWN_MS = 1000 * 60;
 
 const generateCode = () => randomInt(0, 1_000_000).toString().padStart(6, "0");
 
@@ -19,9 +20,7 @@ export const issueEmailVerificationCode = async (userId: string) =>
       .for("update")
       .limit(1);
 
-    if (!user) {
-      throw new Error("User not found");
-    }
+    if (!user) throw new Error("User not found");
 
     const now = new Date();
     const cooldownSince = new Date(now.getTime() - RESEND_COOLDOWN_MS);
@@ -43,18 +42,12 @@ export const issueEmailVerificationCode = async (userId: string) =>
     if (recent) {
       const waitMs =
         RESEND_COOLDOWN_MS - (now.getTime() - recent.createdAt.getTime());
-
-      throw new Error(
-        `Please wait ${Math.ceil(waitMs / 1000)}s before requesting another code`,
-      );
+      throw new ResendCooldownError(Math.ceil(waitMs / 1000));
     }
 
-    // Invalidate any previous active verification codes.
     await tx
       .update(verificationCodes)
-      .set({
-        consumedAt: now,
-      })
+      .set({ consumedAt: now })
       .where(
         and(
           eq(verificationCodes.userId, userId),
@@ -93,6 +86,16 @@ export const verifyEmailCode = (
   const codeHash = sha256(code);
 
   return db.transaction(async (tx) => {
+    // Idempotency: already verified → no-op success.
+    const [user] = await tx
+      .select({ emailVerifiedAt: users.emailVerifiedAt })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!user) return { ok: false, reason: "not_found" };
+    if (user.emailVerifiedAt) return { ok: true };
+
     const [record] = await tx
       .select()
       .from(verificationCodes)
@@ -104,41 +107,32 @@ export const verifyEmailCode = (
         ),
       )
       .orderBy(desc(verificationCodes.createdAt))
-      .limit(1);
+      .limit(1)
+      .for("update");
 
-    if (!record) {
-      return { ok: false, reason: "not_found" };
-    }
+    if (!record) return { ok: false, reason: "not_found" };
 
     if (record.expiresAt.getTime() <= now.getTime()) {
       await tx
         .update(verificationCodes)
-        .set({
-          consumedAt: now,
-        })
+        .set({ consumedAt: now })
         .where(
           and(
             eq(verificationCodes.id, record.id),
             isNull(verificationCodes.consumedAt),
           ),
         );
-
       return { ok: false, reason: "expired" };
     }
 
     if (record.attempts >= MAX_ATTEMPTS) {
-      return {
-        ok: false,
-        reason: "too_many_attempts",
-      };
+      return { ok: false, reason: "too_many_attempts" };
     }
 
     if (codeHash !== record.codeHash) {
       const [updated] = await tx
         .update(verificationCodes)
-        .set({
-          attempts: sql`${verificationCodes.attempts} + 1`,
-        })
+        .set({ attempts: sql`${verificationCodes.attempts} + 1` })
         .where(
           and(
             eq(verificationCodes.id, record.id),
@@ -146,9 +140,7 @@ export const verifyEmailCode = (
             lt(verificationCodes.attempts, MAX_ATTEMPTS),
           ),
         )
-        .returning({
-          attempts: verificationCodes.attempts,
-        });
+        .returning({ attempts: verificationCodes.attempts });
 
       if (!updated) {
         const [current] = await tx
@@ -160,45 +152,33 @@ export const verifyEmailCode = (
           .where(eq(verificationCodes.id, record.id))
           .limit(1);
 
-        if (!current || current.consumedAt) {
+        if (!current || current.consumedAt)
           return { ok: false, reason: "not_found" };
-        }
-
-        if (current.attempts >= MAX_ATTEMPTS) {
-          return {
-            ok: false,
-            reason: "too_many_attempts",
-          };
-        }
-
+        if (current.attempts >= MAX_ATTEMPTS)
+          return { ok: false, reason: "too_many_attempts" };
         return { ok: false, reason: "invalid" };
       }
 
       return { ok: false, reason: "invalid" };
     }
+
     const [consumed] = await tx
       .update(verificationCodes)
-      .set({
-        consumedAt: now,
-      })
+      .set({ consumedAt: now })
       .where(
         and(
           eq(verificationCodes.id, record.id),
           isNull(verificationCodes.consumedAt),
         ),
       )
-      .returning({
-        id: verificationCodes.id,
-      });
-    if (!consumed) {
-      return { ok: false, reason: "not_found" };
-    }
+      .returning({ id: verificationCodes.id });
+
+    if (!consumed) return { ok: false, reason: "not_found" };
+
     await tx
       .update(users)
-      .set({
-        emailVerifiedAt: now,
-      })
-      .where(eq(users.id, userId));
+      .set({ emailVerifiedAt: now })
+      .where(and(eq(users.id, userId), isNull(users.emailVerifiedAt)));
 
     return { ok: true };
   });

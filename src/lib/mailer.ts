@@ -1,5 +1,9 @@
 import nodemailer from "nodemailer";
 
+if (!process.env.MAIL_FROM) {
+  throw new Error("MAIL_FROM is not configured");
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT ?? 587),
@@ -12,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendVerificationEmail = async (to: string, code: string) => {
   await transporter.sendMail({
-    from: process.env.MAIL_FROM ?? "no-reply@gmail.com",
+    from: process.env.MAIL_FROM,
     to,
     subject: "Your verification code",
     text: `Your verification code is ${code}. It expires in 10 minutes.`,

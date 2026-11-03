@@ -7,6 +7,7 @@ import { uploadRemoteFile } from "@/src/lib/cloudinary";
 import { and, eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { upsertUserStats } from "@/src/features/points/lib/upsertUserStats";
 
 export const GET = async (req: NextRequest) => {
   const cookieStore = await cookies();
@@ -229,6 +230,8 @@ export const GET = async (req: NextRequest) => {
             email: normalizedEmail,
             accessToken,
           });
+
+          await upsertUserStats(tx, user.id);
 
           return user;
         });

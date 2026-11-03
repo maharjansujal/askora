@@ -1,5 +1,6 @@
 import { db } from "@/src/db";
 import { oauthAccounts, ranks, users } from "@/src/db/schema";
+import { upsertUserStats } from "@/src/features/points/lib/upsertUserStats";
 import { google } from "@/src/lib/auth/oauth";
 import { createSession, setSessionCookie } from "@/src/lib/auth/session";
 import { generateUsername } from "@/src/lib/auth/username";
@@ -205,6 +206,8 @@ export const GET = async (req: NextRequest) => {
             email: normalizedEmail,
             accessToken: tokens.accessToken(),
           });
+
+          await upsertUserStats(tx, user.id);
 
           return user;
         });
