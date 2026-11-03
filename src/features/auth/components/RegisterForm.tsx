@@ -31,6 +31,7 @@ export const RegisterForm = () => {
           placeholder="Enter your username"
           autoComplete="username"
           disabled={isPending}
+          defaultValue={state.values?.username ?? ""}
         />
       </FormField>
       <FormField label="Email" htmlFor="email">
@@ -41,6 +42,7 @@ export const RegisterForm = () => {
           placeholder="you@example.com"
           autoComplete="email"
           disabled={isPending}
+          defaultValue={state.values?.email ?? ""}
         />
       </FormField>
       <FormField label="Display name" htmlFor="displayName">
@@ -50,6 +52,7 @@ export const RegisterForm = () => {
           type="text"
           placeholder="Your Name"
           disabled={isPending}
+          defaultValue={state.values?.displayName ?? ""}
         />
       </FormField>
       <FormField label="Password" htmlFor="password">

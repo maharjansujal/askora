@@ -17,6 +17,11 @@ export type RegisterState = {
   error?: string;
   message?: string;
   id?: string;
+  values?: {
+    username?: string;
+    email?: string;
+    displayName?: string;
+  };
 };
 
 export async function register(
@@ -38,6 +43,7 @@ export async function register(
   if (!parsed.success) {
     return {
       error: parsed.error.issues[0]?.message ?? "Invalid input.",
+      values: { username, email, displayName },
     };
   }
 
@@ -73,6 +79,7 @@ export async function register(
     if (isUniqueViolation(error)) {
       return {
         error: "An account with those details already exists.",
+        values: { username, email, displayName },
       };
     }
 
@@ -80,6 +87,7 @@ export async function register(
 
     return {
       error: "Something went wrong. Please try again.",
+      values: { username, email, displayName },
     };
   }
 
