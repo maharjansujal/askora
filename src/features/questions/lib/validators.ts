@@ -4,35 +4,33 @@ import {
   MAX_QUESTION_COST,
   MIN_QUESTION_COST,
 } from "../../points/lib/constants";
+import { ProseMirrorDoc } from "@/src/lib/editor/types";
 
-const nonEmptyContent = z.unknown().superRefine((val, ctx) => {
-  let parsed: unknown = val;
-
-  // If it came in as a string (FormData), try to JSON.parse it.
-  if (typeof val === "string") {
-    try {
-      parsed = JSON.parse(val);
-    } catch {
-      ctx.addIssue({
-        code: "custom",
-        message: "Content is not valid JSON",
-      });
+const nonEmptyContent = z
+  .unknown()
+  .superRefine((val, ctx) => {
+    let parsed: unknown = val;
+    if (typeof val === "string") {
+      try {
+        parsed = JSON.parse(val);
+      } catch {
+        ctx.addIssue({ code: "custom", message: "Content is not valid JSON" });
+        return;
+      }
+    }
+    const result = safeParseContent(parsed);
+    if (!result.success) {
+      ctx.addIssue({ code: "custom", message: "Content has an invalid shape" });
       return;
     }
-  }
-
-  const result = safeParseContent(parsed);
-  if (!result.success) {
-    ctx.addIssue({ code: "custom", message: "Content has an invalid shape" });
-    return;
-  }
-
-  // Reject docs that are just an empty paragraph
-  const hasText = JSON.stringify(result.data) !== JSON.stringify(emptyDoc());
-  if (!hasText) {
-    ctx.addIssue({ code: "custom", message: "Content cannot be empty" });
-  }
-});
+    if (JSON.stringify(result.data) === JSON.stringify(emptyDoc())) {
+      ctx.addIssue({ code: "custom", message: "Content cannot be empty" });
+    }
+  })
+  .transform((val): ProseMirrorDoc => {
+    const parsed = typeof val === "string" ? JSON.parse(val) : val;
+    return parsed as ProseMirrorDoc;
+  });
 
 export const createQuestionSchema = z.object({
   title: z

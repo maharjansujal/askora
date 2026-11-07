@@ -5,6 +5,7 @@ import {
   questions,
   subjects,
 } from "@/src/db/schema";
+import { safeParseContent } from "@/src/lib/editor/json";
 import { eq, inArray } from "drizzle-orm";
 
 export const listSubjects = async () =>
@@ -40,13 +41,22 @@ export async function getQuestionById(id: string) {
 
   if (!question) return null;
 
+  const parsedContent = safeParseContent(question.content);
+  if (!parsedContent.success) {
+    console.error(
+      `Question ${question.id} has invalid content shape`,
+      parsedContent.error,
+    );
+    return null;
+  }
+
   const cats = await db
     .select({ id: categories.id, name: categories.name, slug: categories.slug })
     .from(questionCategories)
     .innerJoin(categories, eq(questionCategories.categoryId, categories.id))
     .where(eq(questionCategories.questionId, id));
 
-  return { ...question, categories: cats };
+  return { ...question, content: parsedContent.data, categories: cats };
 }
 
 export async function getQuestionCategoryIds(questionId: string) {

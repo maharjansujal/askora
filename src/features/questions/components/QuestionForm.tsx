@@ -1,0 +1,232 @@
+"use client";
+
+import z from "zod";
+import {
+  MAX_QUESTION_COST,
+  MIN_QUESTION_COST,
+} from "../../points/lib/constants";
+import { useRouter } from "next/navigation";
+import { useSubjects } from "../hooks/useSubjects";
+import { useCategories } from "../hooks/useCategories";
+import { useActionState, useEffect, useState } from "react";
+import { ProseMirrorDoc } from "@/src/lib/editor/types";
+import { emptyDoc } from "@/src/lib/editor/json";
+import { createQuestionAction } from "../actions/createQuestion";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormField } from "@/src/components/form/FormField";
+import { Input } from "@/src/components/form/Input";
+import { RichTextEditor } from "@/src/components/editor/RichTextEditor";
+import { Select } from "@/src/components/form/Select";
+import { PointsCostPicker } from "./PointsCostPicker";
+import { Button } from "@/src/components/ui/Button";
+import { CategoryPicker } from "./CategoryPicker";
+
+const formSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(10, "Title must be at least 10 characters")
+    .max(150, "Title must be 150 characters or fewer"),
+  subjectId: z.uuid({ message: "Please pick a subject" }),
+  categoryIds: z
+    .array(z.uuid())
+    .min(1, "Pick at least one category")
+    .max(3, "You can pick up to 3 categories"),
+  pointsCost: z
+    .number()
+    .int("Points must be a whole number")
+    .min(MIN_QUESTION_COST, `Minimum is ${MIN_QUESTION_COST} points`)
+    .max(MAX_QUESTION_COST, `Maximum is ${MAX_QUESTION_COST} points`),
+});
+
+type FormValues = z.output<typeof formSchema>;
+
+interface QuestionFormProps {
+  pointsBalance: number;
+}
+
+export function QuestionForm({ pointsBalance }: QuestionFormProps) {
+  const router = useRouter();
+  const { subjects, isLoadingSubjects } = useSubjects();
+  const { categories, isLoadingCategories } = useCategories();
+
+  const [content, setContent] = useState<ProseMirrorDoc>(emptyDoc());
+  const [contentError, setContentError] = useState<string | null>(null);
+
+  const [actionState, formAction, isSubmitting] = useActionState(
+    createQuestionAction,
+    { ok: null },
+  );
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting: rhfSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      subjectId: "",
+      categoryIds: [],
+      pointsCost: 20,
+    },
+  });
+
+  const watchedCost = watch("pointsCost");
+  const canAfford = pointsBalance >= watchedCost;
+
+  useEffect(() => {
+    if (actionState && actionState.ok === true) {
+      router.push(`/questions/${actionState.questionId}`);
+    }
+  }, [actionState, router]);
+
+  function onSubmit(data: FormValues) {
+    const contentJson = JSON.stringify(content);
+    const emptyJson = JSON.stringify(emptyDoc());
+    if (contentJson === emptyJson) {
+      setContentError("Please add some content to your question");
+      return;
+    }
+    setContentError(null);
+  }
+
+  const isSubmittingForm = isSubmitting || rhfSubmitting;
+
+  return (
+    <form
+      action={formAction}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6"
+    >
+      <FormField
+        label="Title"
+        required
+        error={errors.title?.message}
+        message="A clear, specific title helps people find your question"
+      >
+        <Input
+          {...register("title")}
+          placeholder="e.g. Why does my Next.js build fail on Windows?"
+          disabled={isSubmittingForm}
+          error={!!errors.title}
+          autoComplete="off"
+          maxLength={150}
+        />
+      </FormField>
+      <FormField
+        label="Question details"
+        required
+        error={contentError ?? undefined}
+      >
+        <RichTextEditor
+          value={content}
+          onChange={setContent}
+          placeholder="Share context, what you've tried, and what you expected to happen…"
+          minHeight={260}
+          editable={!isSubmittingForm}
+        />
+        {/* Hidden input sends the content along with the form submission */}
+        <input type="hidden" name="content" value={JSON.stringify(content)} />
+      </FormField>
+      <FormField
+        label="Subject"
+        required
+        error={errors.subjectId?.message}
+        message="The broad topic area this question belongs to"
+      >
+        <Select
+          {...register("subjectId")}
+          options={[
+            {
+              label: isLoadingSubjects ? "Loading subjects…" : "Pick a subject",
+              value: "",
+            },
+            ...subjects.map((s) => ({
+              label: s.name,
+              value: s.id,
+            })),
+          ]}
+          disabled={isSubmittingForm || isLoadingSubjects}
+          error={!!errors.subjectId}
+        />
+      </FormField>
+      <FormField
+        label="Categories"
+        required
+        error={errors.categoryIds?.message}
+        message="Up to 3 — helps route your question to the right experts"
+      >
+        <Controller
+          control={control}
+          name="categoryIds"
+          render={({ field }) => (
+            <CategoryPicker
+              categories={categories}
+              loading={isLoadingCategories}
+              selected={field.value}
+              onChange={field.onChange}
+              disabled={isSubmittingForm}
+            />
+          )}
+        />
+        {watch("categoryIds").map((id) => (
+          <input key={id} type="hidden" name="categoryIds" value={id} />
+        ))}
+      </FormField>
+      <FormField
+        label="Points to spend"
+        required
+        error={errors.pointsCost?.message}
+      >
+        <Controller
+          control={control}
+          name="pointsCost"
+          render={({ field }) => (
+            <PointsCostPicker
+              value={field.value}
+              onChange={field.onChange}
+              balance={pointsBalance}
+              disabled={isSubmittingForm}
+              error={errors.pointsCost?.message}
+            />
+          )}
+        />
+        {/* Hidden input to ensure pointsCost lands in FormData */}
+        <input type="hidden" name="pointsCost" value={watch("pointsCost")} />
+      </FormField>
+
+      {/* Server error */}
+      {actionState && actionState.ok === false && (
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
+          <p className="text-sm font-medium text-destructive">
+            {actionState.error}
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => router.back()}
+          disabled={isSubmittingForm}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          loading={isSubmittingForm}
+          disabled={isSubmittingForm || !canAfford}
+        >
+          {canAfford
+            ? `Ask question (${watchedCost} pts)`
+            : `Not enough points (need ${watchedCost - pointsBalance} more)`}
+        </Button>
+      </div>
+    </form>
+  );
+}
