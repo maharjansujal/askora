@@ -58,6 +58,7 @@ export const userNavItems: NavGroup[] = [
         href: "/bookmarks",
         // icon: Bookmark,
       },
+      { label: "Questions", href: "/questions" },
     ],
   },
 ];

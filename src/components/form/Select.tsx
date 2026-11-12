@@ -26,6 +26,7 @@ export const Select = ({
     <select
       {...props}
       disabled={disabled}
+      onChange={onChange}
       aria-invalid={error || undefined}
       className={clsx(
         "w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50",

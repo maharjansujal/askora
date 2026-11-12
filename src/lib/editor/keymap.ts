@@ -51,11 +51,6 @@ export const buildKeyMap = () => [
     "Mod-Shift-2": setBlockType(nodes.heading, { level: 2 }),
     "Mod-Shift-3": setBlockType(nodes.heading, { level: 3 }),
     "Mod-Shift-0": setBlockType(nodes.paragraph),
-
-    Backspace: chainCommands(exitCode, (state, dispatch) => {
-      if (dispatch) dispatch(state.tr.deleteSelection());
-      return true;
-    }),
   }),
 
   // history (undo/redo stack) — must come after our own keybindings

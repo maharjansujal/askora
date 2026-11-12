@@ -8,7 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useSubjects } from "../hooks/useSubjects";
 import { useCategories } from "../hooks/useCategories";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { ProseMirrorDoc } from "@/src/lib/editor/types";
 import { emptyDoc } from "@/src/lib/editor/json";
 import { createQuestionAction } from "../actions/createQuestion";
@@ -38,6 +38,16 @@ const formSchema = z.object({
     .int("Points must be a whole number")
     .min(MIN_QUESTION_COST, `Minimum is ${MIN_QUESTION_COST} points`)
     .max(MAX_QUESTION_COST, `Maximum is ${MAX_QUESTION_COST} points`),
+  content: z.string().refine(
+    (val) => {
+      try {
+        return JSON.stringify(JSON.parse(val)) !== JSON.stringify(emptyDoc());
+      } catch {
+        return false;
+      }
+    },
+    { message: "Please add some content to your question" },
+  ),
 });
 
 type FormValues = z.output<typeof formSchema>;
@@ -64,6 +74,7 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting: rhfSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -72,6 +83,7 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
       subjectId: "",
       categoryIds: [],
       pointsCost: 20,
+      content: JSON.stringify(emptyDoc()),
     },
   });
 
@@ -87,21 +99,33 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
   function onSubmit(data: FormValues) {
     const contentJson = JSON.stringify(content);
     const emptyJson = JSON.stringify(emptyDoc());
+
     if (contentJson === emptyJson) {
       setContentError("Please add some content to your question");
       return;
     }
-    setContentError(null);
-  }
 
+    setContentError(null);
+
+    const formData = new FormData();
+
+    formData.set("title", data.title);
+    formData.set("subjectId", data.subjectId);
+    formData.set("content", contentJson);
+    formData.set("pointsCost", String(data.pointsCost));
+
+    data.categoryIds.forEach((id) => {
+      formData.append("categoryIds", id);
+    });
+
+    startTransition(() => {
+      formAction(formData);
+    });
+  }
   const isSubmittingForm = isSubmitting || rhfSubmitting;
 
   return (
-    <form
-      action={formAction}
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <FormField
         label="Title"
         required
@@ -124,13 +148,16 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
       >
         <RichTextEditor
           value={content}
-          onChange={setContent}
+          onChange={(doc) => {
+            setContent(doc);
+            setValue("content", JSON.stringify(doc), { shouldValidate: false });
+          }}
           placeholder="Share context, what you've tried, and what you expected to happen…"
           minHeight={260}
           editable={!isSubmittingForm}
         />
         {/* Hidden input sends the content along with the form submission */}
-        <input type="hidden" name="content" value={JSON.stringify(content)} />
+        <input type="hidden" {...register("content")} />
       </FormField>
       <FormField
         label="Subject"
