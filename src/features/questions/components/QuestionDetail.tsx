@@ -5,7 +5,7 @@ import { AnswerForm } from "../../answers/components/AnswerForm";
 import { AnswerItem, AnswerList } from "../../answers/components/AnswerList";
 import { ProseMirrorDoc } from "@/src/lib/editor/types";
 import { QuestionVoteButtons } from "./QuestionVoteButtons";
-import { QuestionDetail as QuestionDetailType } from "../hooks/useQuestion";
+import { QuestionDetail as QuestionDetailType } from "../types/questionTypes";
 
 interface QuestionDetailProps {
   question: QuestionDetailType;

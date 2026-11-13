@@ -2,11 +2,12 @@
 
 import { RichTextViewer } from "@/src/components/editor/RichTextViewer";
 import { useAcceptAnswer } from "../hooks/useAcceptAnswer";
-import { useVoteAnswer, VoteValue } from "../hooks/useVoteAnswer";
+import { useVoteAnswer } from "../hooks/useVoteAnswer";
 import { useMemo } from "react";
 import { ProseMirrorDoc } from "@/src/lib/editor/types";
 import { Check, CheckCircle2 } from "lucide-react";
 import { VoteButtons } from "./VoteButton";
+import { VoteValue } from "../types/answerTypes";
 
 export interface AnswerItem {
   id: string;

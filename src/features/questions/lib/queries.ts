@@ -13,7 +13,7 @@ import {
 import { safeParseContent } from "@/src/lib/editor/json";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { AnswerItem } from "../../answers/components/AnswerList";
-import { QuestionDetail } from "../hooks/useQuestion";
+import { QuestionDetail } from "../types/questionTypes";
 
 export const listSubjects = async () =>
   db

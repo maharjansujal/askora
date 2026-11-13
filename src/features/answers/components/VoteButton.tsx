@@ -2,8 +2,7 @@
 
 import { clsx } from "clsx";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-export type VoteValue = "UPVOTE" | "DOWNVOTE";
+import { VoteValue } from "../types/answerTypes";
 
 interface VoteButtonsProps {
   score: number;

@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-
-export type VoteValue = "UPVOTE" | "DOWNVOTE";
+import { VoteValue } from "../types/answerTypes";
 
 interface VoteAnswerArgs {
   answerId: string;

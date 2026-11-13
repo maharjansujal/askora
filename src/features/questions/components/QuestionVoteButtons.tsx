@@ -1,5 +1,6 @@
 import { VoteButtons } from "../../answers/components/VoteButton";
-import { useVoteQuestion, VoteValue } from "../hooks/useVoteQuestion";
+import { useVoteQuestion } from "../hooks/useVoteQuestion";
+import { VoteValue } from "../types/questionTypes";
 
 interface QuestionVoteButtonProps {
   questionId: string;
