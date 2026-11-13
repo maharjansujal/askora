@@ -67,7 +67,6 @@ export function useUsers() {
     mutationFn: async (payload: CreateUserPayload) => {
       try {
         const res = await axios.post("/api/admin/users", payload);
-        console.log("Users query", usersQuery);
         return res.data;
       } catch (error) {
         if (axios.isAxiosError(error)) {

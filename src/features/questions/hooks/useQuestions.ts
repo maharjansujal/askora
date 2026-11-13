@@ -51,9 +51,8 @@ export function useQuestions(params: UseQuestionsParams = {}) {
         throw error;
       }
     },
-    // Keeps the old list visible while paginating — avoids full-page spinner
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 30, // 30 seconds — questions change fairly often
+    staleTime: 1000 * 30,
   });
 
   return {

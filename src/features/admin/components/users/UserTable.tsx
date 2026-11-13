@@ -58,8 +58,6 @@ export function UserTable({ data, isLoading, onEdit, onBan }: UserTableProps) {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  console.log("User table data", data);
-
   return (
     <div className="overflow-x-auto border">
       <table className="w-full">

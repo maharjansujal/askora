@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FeedFilters, FeedFilterState } from "./FeedFilters";
-import { useQuestions } from "../hooks/useQuestions";
 import { Button } from "@/src/components/ui/Button";
 import Link from "next/link";
 import { Inbox, Plus } from "lucide-react";
@@ -11,6 +10,7 @@ import { Modal } from "@/src/components/ui/Modal/Modal";
 import { useModal } from "@/src/components/ui/Modal/useModal";
 import { QuestionForm } from "./QuestionForm";
 import { ProfileDto } from "../../public/types/profileDto";
+import { useQuestions } from "../hooks/useQuestions";
 
 const EMPTY_FILTERS: FeedFilterState = {
   subjectId: "",

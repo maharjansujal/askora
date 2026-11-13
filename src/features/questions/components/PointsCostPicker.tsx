@@ -2,17 +2,15 @@
 
 import React, { useMemo } from "react";
 import {
-  ACCEPTED_ANSWER_REWARD_PERCENT,
-  computeAcceptedAnswerReward,
   MAX_QUESTION_COST,
   MIN_QUESTION_COST,
 } from "../../points/lib/constants";
-import { Coins, Gift, TrendingUp } from "lucide-react";
+import { Coins, TrendingUp, Wallet } from "lucide-react";
 
 interface PointsCostPickerProps {
   value: number;
   onChange: (next: number) => void;
-  balance: number; // Gotta know user's current points balance for "You can't afford this" realization
+  balance: number;
   disabled?: boolean;
   error?: string;
 }
@@ -24,7 +22,6 @@ export function PointsCostPicker({
   disabled = false,
   error,
 }: PointsCostPickerProps) {
-  // Fill percentage: used to style the slider track
   const percent = useMemo(
     () =>
       ((value - MIN_QUESTION_COST) / (MAX_QUESTION_COST - MIN_QUESTION_COST)) *
@@ -32,8 +29,8 @@ export function PointsCostPicker({
     [value],
   );
 
-  const reward = computeAcceptedAnswerReward(value);
   const canAfford = balance >= value;
+  const remaining = balance - value;
 
   const priorityHint =
     value <= 15
@@ -97,20 +94,23 @@ export function PointsCostPicker({
           value={priorityHint}
         />
         <InfoCard
-          icon={Gift}
-          label={`Accepted answer reward (${ACCEPTED_ANSWER_REWARD_PERCENT}%)`}
-          value={`${reward} pts to the answerer`}
+          icon={Wallet}
+          label="After posting"
+          value={
+            canAfford
+              ? `${remaining} pts remaining`
+              : `Not enough — need ${value - balance} more`
+          }
         />
       </div>
 
-      {/* Balance hint — only shows when the user can't afford it */}
+      {/* Balance hint — only when unaffordable */}
       {!canAfford && (
         <p className="text-xs font-medium text-destructive">
           You have {balance} pts — need {value - balance} more for this cost.
         </p>
       )}
 
-      {/* Form error */}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );

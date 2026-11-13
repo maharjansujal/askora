@@ -12,8 +12,13 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
-import { answerStatusEnum, questionStatusEnum, voteValueEnum } from "./enums";
-import { sql } from "drizzle-orm";
+import {
+  AnswerStatus,
+  answerStatusEnum,
+  questionStatusEnum,
+  voteValueEnum,
+} from "./enums";
+import { InferSelectModel, sql } from "drizzle-orm";
 
 export const subjects = pgTable(
   "subjects",
@@ -181,6 +186,8 @@ export const answers = pgTable(
     index("answers_status_idx").on(table.status),
   ],
 );
+
+export type Answer = InferSelectModel<typeof answers>;
 
 export const answerAcceptances = pgTable(
   "answer_acceptances",
