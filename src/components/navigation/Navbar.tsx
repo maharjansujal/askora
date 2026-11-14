@@ -1,11 +1,9 @@
 import { UserButton } from "@/src/components/ui/UserButton";
+import { NotificationBell } from "@/src/features/notifications/components/NotificationBell";
 import { getCurrentUser } from "@/src/lib/auth/session";
 import { Bell, Search } from "lucide-react";
 
 export const Navbar = async () => {
-  const pointsBalance = 240;
-  const hasUnreadNotifications = true;
-
   const user = await getCurrentUser();
 
   return (
@@ -31,21 +29,8 @@ export const Navbar = async () => {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-3">
-          {/* Points balance pill */}
-          <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/15 px-2.5 py-1 text-xs font-bold text-accent">
-            ✦ {pointsBalance} pts
-          </span>
           {/* Notifications */}
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted transition-colors"
-          >
-            <Bell className="h-4.75 w-4.75" />
-            {hasUnreadNotifications && (
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-            )}
-          </button>
+          <NotificationBell />
           {/* User menu */}
           {user && <UserButton user={user} />}
         </div>

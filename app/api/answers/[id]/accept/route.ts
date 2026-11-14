@@ -86,6 +86,7 @@ export async function POST(
         await revokeAcceptanceInTx(tx, {
           acceptanceId: existingAcceptance.id,
           answerId: existingAcceptance.answerId,
+          questionId: answerRow.questionId,
         });
       }
 
@@ -104,8 +105,8 @@ export async function POST(
         type: "ANSWER_ACCEPTED",
         title: "Your answer was accepted",
         message: "Your answer was marked as the accepted answer.",
-        referenceType: "answer",
-        referenceId: answerId,
+        referenceType: "question",
+        referenceId: answerRow.questionId,
       });
 
       return { accepted: true as const, changed: true };
@@ -144,6 +145,7 @@ export async function DELETE(
           answerId: answers.id,
           answerAuthorId: answers.authorId,
           questionAuthorId: questions.authorId,
+          questionId: questions.id,
         })
         .from(answers)
         .innerJoin(questions, eq(answers.questionId, questions.id))
@@ -171,6 +173,7 @@ export async function DELETE(
       await revokeAcceptanceInTx(tx, {
         acceptanceId: acceptance.id,
         answerId,
+        questionId: answerRow.questionId,
       });
     });
 
@@ -185,9 +188,9 @@ export async function DELETE(
 
 async function revokeAcceptanceInTx(
   tx: Tx,
-  args: { acceptanceId: string; answerId: string },
+  args: { acceptanceId: string; answerId: string; questionId: string },
 ) {
-  const { acceptanceId, answerId } = args;
+  const { acceptanceId, answerId, questionId } = args;
 
   const [answer] = await tx
     .select({ authorId: answers.authorId })
