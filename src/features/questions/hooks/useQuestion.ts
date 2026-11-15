@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { QuestionDetail } from "../types/questionTypes";
 
-export function useQuestion(id: string) {
+export function useQuestion(id: string, initialData?: QuestionDetail) {
   const query = useQuery({
     queryKey: ["question", id],
     queryFn: async (): Promise<QuestionDetail> => {
@@ -24,7 +24,7 @@ export function useQuestion(id: string) {
   });
 
   return {
-    question: query.data ?? null,
+    question: query.data ?? initialData ?? null,
     isLoadingQuestion: query.isLoading,
     isErrorQuestion: query.isError,
   };

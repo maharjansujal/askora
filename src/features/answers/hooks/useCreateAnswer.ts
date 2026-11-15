@@ -29,6 +29,7 @@ export function useCreateAnswer() {
     onSuccess: (_data, { questionId }) => {
       queryClient.invalidateQueries({ queryKey: ["answers", questionId] });
       queryClient.invalidateQueries({ queryKey: ["question", questionId] });
+      console.log(`/questions/${questionId} invalidated`);
     },
   });
   return {

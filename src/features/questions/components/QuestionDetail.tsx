@@ -7,20 +7,22 @@ import { ProseMirrorDoc } from "@/src/lib/editor/types";
 import { QuestionVoteButtons } from "./QuestionVoteButtons";
 import { QuestionDetail as QuestionDetailType } from "../types/questionTypes";
 import { formatRelative } from "@/src/utils";
+import { useQuestion } from "../hooks/useQuestion";
+import { useAnswers } from "../../answers/hooks/useAnswers";
 
 interface QuestionDetailProps {
-  question: QuestionDetailType;
-  answers: AnswerItem[];
+  initialQuestion: QuestionDetailType;
+  initialAnswers: AnswerItem[];
   currentUserId: string | null;
 }
 
 export function QuestionDetail({
-  question,
-  answers,
   currentUserId,
+  initialQuestion,
+  initialAnswers,
 }: QuestionDetailProps) {
-  const isQuestionAuthor = currentUserId === question.authorId;
-  const isQuestionClosed = question.status !== "OPEN";
+  const isQuestionAuthor = currentUserId === initialQuestion.authorId;
+  const isQuestionClosed = initialQuestion.status !== "OPEN";
   const canAnswer = !!currentUserId && !isQuestionClosed;
 
   const answerDisabledReason = !currentUserId
@@ -28,6 +30,14 @@ export function QuestionDetail({
     : isQuestionClosed
       ? "This question is closed and no longer accepts answers."
       : undefined;
+
+  const { question: fetchedQuestion } = useQuestion(
+    initialQuestion.id,
+    initialQuestion,
+  );
+  const { answers } = useAnswers(initialQuestion.id, initialAnswers);
+
+  const question = fetchedQuestion ?? initialQuestion;
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">

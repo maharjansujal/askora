@@ -22,8 +22,8 @@ export default async function QuestionDetailPage({ params }: PageProps) {
 
   return (
     <QuestionDetail
-      question={result.question}
-      answers={result.answers}
+      initialQuestion={result.question}
+      initialAnswers={result.answers}
       currentUserId={currentUser.id}
     />
   );

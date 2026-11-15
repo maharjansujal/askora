@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { ProfileHeader } from "@/src/features/profile/components/ProfileHeader";
 import { getCurrentUser } from "@/src/lib/auth/session";
 import { getUserProfile } from "@/src/features/public/actions/getUserProfile";
+import { ProfileStats } from "@/src/features/profile/components/ProfileStats";
+import { RankProgress } from "@/src/features/profile/components/RankProgress";
 
 export default async function UserProfilePage({
   params,
@@ -21,5 +23,14 @@ export default async function UserProfilePage({
 
   const isOwner = currentUser?.id === profile.id;
 
-  return <ProfileHeader isOwner={isOwner} profile={profile} />;
+  return (
+    <>
+      <ProfileHeader isOwner={isOwner} profile={profile} />
+      <ProfileStats stats={profile.stats} />
+      <RankProgress
+        currentRankName={profile.rank.name}
+        nextRank={profile.nextRank}
+      />
+    </>
+  );
 }
