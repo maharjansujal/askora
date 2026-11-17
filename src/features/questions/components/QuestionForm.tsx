@@ -21,6 +21,7 @@ import { Select } from "@/src/components/form/Select";
 import { PointsCostPicker } from "./PointsCostPicker";
 import { Button } from "@/src/components/ui/Button";
 import { CategoryPicker } from "./CategoryPicker";
+import { useUpdateQuestion } from "../hooks/useUpdateQuestion";
 
 const formSchema = z.object({
   title: z
@@ -53,16 +54,32 @@ const formSchema = z.object({
 type FormValues = z.output<typeof formSchema>;
 
 interface QuestionFormProps {
-  pointsBalance: number;
+  pointsBalance?: number;
+  initialData?: {
+    questionId: string;
+    title: string;
+    content: ProseMirrorDoc;
+    subjectId: string;
+    categoryIds: string[];
+    pointsCost: number;
+  };
+  onSuccess?: (questionId: string) => void;
 }
 
-export function QuestionForm({ pointsBalance }: QuestionFormProps) {
+export function QuestionForm({
+  pointsBalance = 20,
+  initialData,
+  onSuccess,
+}: QuestionFormProps) {
   const router = useRouter();
   const { subjects, isLoadingSubjects } = useSubjects();
   const { categories, isLoadingCategories } = useCategories();
 
-  const [content, setContent] = useState<ProseMirrorDoc>(emptyDoc());
-  const [contentError, setContentError] = useState<string | null>(null);
+  const [content, setContent] = useState<ProseMirrorDoc>(
+    initialData?.content ?? emptyDoc(),
+  );
+
+  const { isUpdatingQuestion, updateQuestion } = useUpdateQuestion();
 
   const [actionState, formAction, isSubmitting] = useActionState(
     createQuestionAction,
@@ -78,13 +95,21 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
     formState: { errors, isSubmitting: rhfSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      subjectId: "",
-      categoryIds: [],
-      pointsCost: 20,
-      content: JSON.stringify(emptyDoc()),
-    },
+    defaultValues: initialData
+      ? {
+          title: initialData.title,
+          subjectId: initialData.subjectId,
+          categoryIds: initialData.categoryIds,
+          pointsCost: initialData.pointsCost,
+          content: JSON.stringify(initialData.content.content),
+        }
+      : {
+          title: "",
+          subjectId: "",
+          categoryIds: [],
+          pointsCost: 20,
+          content: JSON.stringify(emptyDoc()),
+        },
   });
 
   const watchedCost = watch("pointsCost");
@@ -96,33 +121,34 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
     }
   }, [actionState, router]);
 
-  function onSubmit(data: FormValues) {
-    const contentJson = JSON.stringify(content);
-    const emptyJson = JSON.stringify(emptyDoc());
-
-    if (contentJson === emptyJson) {
-      setContentError("Please add some content to your question");
+  async function onSubmit(data: FormValues) {
+    if (isEdit && initialData) {
+      try {
+        await updateQuestion({
+          questionId: initialData.questionId,
+          title: data.title,
+          content: JSON.parse(data.content),
+          subjectId: data.subjectId,
+          categoryIds: data.categoryIds,
+        });
+        onSuccess?.(initialData.questionId);
+      } catch {}
       return;
     }
 
-    setContentError(null);
-
     const formData = new FormData();
-
     formData.set("title", data.title);
     formData.set("subjectId", data.subjectId);
-    formData.set("content", contentJson);
+    formData.set("content", data.content);
     formData.set("pointsCost", String(data.pointsCost));
-
-    data.categoryIds.forEach((id) => {
-      formData.append("categoryIds", id);
-    });
+    data.categoryIds.forEach((id) => formData.append("categoryIds", id));
 
     startTransition(() => {
       formAction(formData);
     });
   }
-  const isSubmittingForm = isSubmitting || rhfSubmitting;
+  const isSubmittingForm = isSubmitting || rhfSubmitting || isUpdatingQuestion;
+  const isEdit = !!initialData;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -141,11 +167,7 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
           maxLength={150}
         />
       </FormField>
-      <FormField
-        label="Question details"
-        required
-        error={contentError ?? undefined}
-      >
+      <FormField label="Question details" required>
         <RichTextEditor
           value={content}
           onChange={(doc) => {
@@ -217,7 +239,7 @@ export function QuestionForm({ pointsBalance }: QuestionFormProps) {
               value={field.value}
               onChange={field.onChange}
               balance={pointsBalance}
-              disabled={isSubmittingForm}
+              disabled={isSubmittingForm || isEdit}
               error={errors.pointsCost?.message}
             />
           )}

@@ -9,6 +9,11 @@ import { QuestionDetail as QuestionDetailType } from "../types/questionTypes";
 import { formatRelative } from "@/src/utils";
 import { useQuestion } from "../hooks/useQuestion";
 import { useAnswers } from "../../answers/hooks/useAnswers";
+import { QuestionForm } from "./QuestionForm";
+import { Modal } from "@/src/components/ui/Modal/Modal";
+import { useModal } from "@/src/components/ui/Modal/useModal";
+import { Button } from "@/src/components/ui/Button";
+import { Pencil } from "lucide-react";
 
 interface QuestionDetailProps {
   initialQuestion: QuestionDetailType;
@@ -25,6 +30,7 @@ export function QuestionDetail({
   const isQuestionClosed = initialQuestion.status !== "OPEN";
   const canAnswer = !!currentUserId && !isQuestionClosed;
 
+  const editModal = useModal();
   const answerDisabledReason = !currentUserId
     ? "Sign in to answer this question."
     : isQuestionClosed
@@ -66,6 +72,18 @@ export function QuestionDetail({
                   <span className="rounded-full bg-destructive/15 px-2 py-0.5 font-semibold text-destructive">
                     {question.status}
                   </span>
+                )}
+
+                {isQuestionAuthor && question.status === "OPEN" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={Pencil}
+                    onClick={editModal.openModal}
+                    className="ml-auto"
+                  >
+                    Edit
+                  </Button>
                 )}
               </div>
               <h1 className="text-2xl font-bold leading-tight text-foreground">
@@ -128,6 +146,28 @@ export function QuestionDetail({
           />
         </div>
       )}
+      <Modal
+        open={editModal.open}
+        onClose={editModal.closeModal}
+        title="Edit Question"
+      >
+        <div className="p-10 w-full md:w-7xl">
+          <QuestionForm
+            pointsBalance={0 /* not used in edit mode */}
+            initialData={{
+              questionId: question.id,
+              title: question.title,
+              content: question.content as ProseMirrorDoc,
+              subjectId: question.subjectId,
+              categoryIds: question.categories.map((c) => c.id),
+              pointsCost: question.pointsCost,
+            }}
+            onSuccess={() => {
+              editModal.closeModal();
+            }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }
